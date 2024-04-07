@@ -6,9 +6,9 @@ sequenceDiagram
     server->>browser: HTTP status code 302, server asks the browser to do a new HTTP GET request to the address defined in the header's Location - the address notes
     browser->>browser: reloads the Notes page
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
-    browser->>server: the css file
+    server->>browser: the css file
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.js
-    browser->>server: the JavaScript file
+    server->>browser: the JavaScript file
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
-    browser->>server: Raw data of json file
+    server->>browser: Raw data of json file
 ```
