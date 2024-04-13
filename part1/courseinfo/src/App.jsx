@@ -22,14 +22,24 @@ const App = () => {
       <button onClick={handleClick1}>Neutral</button>
       <button onClick={handleClick2}>Bad</button>
       <h1>Statistics</h1>
-      <p>Good: {good}</p>
-      <p>Neutral: {neutral}</p>
-      <p>Bad: {bad}</p>
-      <p>All: {all}</p>
-      <p>Average: {(good - bad) / all}</p>
-      <p>Positive: {good / all}%</p>
+      {all == 0 ? (
+        <p>No feedback given</p>
+      ) : (
+        <Statistics good={good} neutral={neutral} bad={bad} all={all} />
+      )}
     </>
   );
 };
-
+const Statistics = (props) => {
+  return (
+    <>
+      <p>Good: {props.good}</p>
+      <p>Neutral: {props.neutral}</p>
+      <p>Bad: {props.bad}</p>
+      <p>All: {props.all}</p>
+      <p>Average: {(props.good - props.bad) / props.all}</p>
+      <p>Positive: {props.good / props.all}%</p>
+    </>
+  );
+};
 export default App;
