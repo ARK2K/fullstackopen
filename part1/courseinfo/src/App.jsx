@@ -45,7 +45,6 @@ const Part = ({ prop }) => {
   );
 };
 const Total = (props) => {
-  console.log(props);
   return (
     <p>
       Number of exercises{" "}
