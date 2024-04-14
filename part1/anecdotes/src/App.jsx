@@ -11,32 +11,31 @@ const App = () => {
     "Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.",
     "The only way to go fast, is to go well.",
   ];
-  const [vote, setVote] = useState({
-    0: 0,
-    1: 0,
-    2: 0,
-    3: 0,
-    4: 0,
-    5: 0,
-    6: 0,
-    7: 0,
-  });
-  const v1 = { ...vote };
+  const [vote, setVote] = useState([0, 0, 0, 0, 0, 0, 0, 0]);
+  const v1 = [...vote];
+  let max = v1.reduce(
+    (maxIndex, elem, i, arr) => (elem > arr[maxIndex] ? i : maxIndex),
+    0
+  );
   const [selected, setSelected] = useState(0);
   console.log(vote);
-  console.log(v1.selected);
+  console.log(max);
   console.log(selected);
   const handleClick = () => {
     v1[selected] += 1;
-    setVote({ ...v1 });
+    setVote([...v1]);
   };
   const handleClick1 = () => setSelected(selected + 1);
   return (
     <>
+      <h1>Anectode of the day</h1>
       <p>{anecdotes[selected]}</p>
       <p>has {vote[selected]} votes</p>
       <Button click={handleClick} text="Vote" />
       <Button click={handleClick1} text="Next anecdotes" />
+      <h1>Anectode with most votes</h1>
+      <p>{anecdotes[max]}</p>
+      <p>has {vote[max]} votes</p>
     </>
   );
 };
