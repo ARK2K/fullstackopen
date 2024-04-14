@@ -1,62 +1,57 @@
-import { useState } from "react";
-
 const App = () => {
-  // save clicks of each button to its own state
-  const [good, setGood] = useState(0);
-  const [neutral, setNeutral] = useState(0);
-  const [bad, setBad] = useState(0);
-  let all = good + neutral + bad;
-  const handleClick = () => {
-    setGood(good + 1);
+  const course = {
+    name: "Half Stack application development",
+    parts: [
+      {
+        name: "Fundamentals of React",
+        exercises: 10,
+      },
+      {
+        name: "Using props to pass data",
+        exercises: 7,
+      },
+      {
+        name: "State of a component",
+        exercises: 14,
+      },
+    ],
   };
-  const handleClick1 = () => {
-    setNeutral(neutral + 1);
-  };
-  const handleClick2 = () => {
-    setBad(bad + 1);
-  };
+
   return (
     <>
-      <h1>Give Feedback</h1>
-      <Button text="Good" click={handleClick} />
-      <Button text="Neutral" click={handleClick1} />
-      <Button text="Bad" click={handleClick2} />
-      <h1>Statistics</h1>
-      {all == 0 ? (
-        <p>No feedback given</p>
-      ) : (
-        <Statistics good={good} neutral={neutral} bad={bad} all={all} />
-      )}
+      <Header props={course} />
+      <Content parts={course.parts} />
+      <Total parts={course.parts} />
     </>
   );
 };
-const Statistics = (props) => {
+const Header = ({ props }) => {
+  return <h1>{props.name}</h1>;
+};
+const Content = (props) => {
   return (
     <>
-      <StatisticLine text="Good" value={props.good} per="" />
-      <StatisticLine text="Neutral" value={props.neutral} per="" />
-      <StatisticLine text="Bad" value={props.bad} per="" />
-      <StatisticLine text="All" value={props.all} per="" />
-      <StatisticLine
-        text="Average"
-        value={(props.good - props.bad) / props.all}
-        per=""
-      />
-      <StatisticLine
-        text="Positive"
-        value={(props.good / props.all) * 100}
-        per="%"
-      />
+      <Part prop={props.parts[0]} />
+      <Part prop={props.parts[1]} />
+      <Part prop={props.parts[2]} />
     </>
   );
 };
-const Button = (props) => {
-  return <button onClick={props.click}>{props.text}</button>;
-};
-const StatisticLine = (props) => {
+const Part = ({ prop }) => {
   return (
     <p>
-      {props.text}: {props.value} {props.per}
+      {prop.name} {prop.exercises}
+    </p>
+  );
+};
+const Total = (props) => {
+  console.log(props);
+  return (
+    <p>
+      Number of exercises{" "}
+      {props.parts[0].exercises +
+        props.parts[1].exercises +
+        props.parts[2].exercises}
     </p>
   );
 };
