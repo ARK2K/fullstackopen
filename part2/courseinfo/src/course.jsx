@@ -1,3 +1,6 @@
+const listStyle = {
+  listStyleType: "none",
+};
 const Course = ({ course }) => {
   return (
     <>
@@ -11,15 +14,21 @@ const Header = ({ props }) => {
   return <h1>{props.name}</h1>;
 };
 const Content = (props) => {
+  console.log(props.parts, "cont");
   return (
     <>
-      <Part prop={props.parts[0]} />
-      <Part prop={props.parts[1]} />
-      <Part prop={props.parts[2]} />
+      {props.parts.map((e, i) => {
+        return (
+          <div key={i}>
+            <Part prop={e} />
+          </div>
+        );
+      })}
     </>
   );
 };
 const Part = ({ prop }) => {
+  console.log(prop, "part");
   return (
     <p>
       {prop.name} {prop.exercises}
@@ -29,7 +38,10 @@ const Part = ({ prop }) => {
 const Total = (props) => {
   return (
     <p>
-      Number of exercises {props.parts.reduce((sum, n) => sum + n.exercises, 0)}
+      <b>
+        Total of {props.parts.reduce((sum, n) => sum + n.exercises, 0)}{" "}
+        exercises
+      </b>
     </p>
   );
 };
