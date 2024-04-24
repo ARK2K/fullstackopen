@@ -10,25 +10,23 @@ const Filter = (props) => {
 };
 const PersonForm = (props) => {
   return (
-    <form>
+    <form onSubmit={props.submit}>
       <div>
         name:{" "}
         <input
-          value={props.newName}
-          onChange={(e) => props.setNewName(e.target.value)}
+          value={props.name}
+          onChange={(e) => props.setName(e.target.value)}
         />
       </div>
       <div>
         number:{" "}
         <input
-          value={props.newNumber}
-          onChange={(e) => props.setNewNumber(e.target.value)}
+          value={props.number}
+          onChange={(e) => props.setNumber(e.target.value)}
         />
       </div>
       <div>
-        <button type="submit" onClick={props.handleSubmit}>
-          Add
-        </button>
+        <button type="submit">Add</button>
       </div>
     </form>
   );
@@ -41,14 +39,14 @@ const Persons = ({ search, persons }) => {
             .filter((person) => person.name.toLowerCase().includes(search))
             .map((person) => {
               return (
-                <li key={person.name}>
+                <li key={person.id}>
                   {person.name} {person.number}
                 </li>
               );
             })
         : persons.map((person) => {
             return (
-              <li key={person.name}>
+              <li key={person.id}>
                 {person.name} {person.number}
               </li>
             );

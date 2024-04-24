@@ -6,19 +6,32 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [search, setSearch] = useState("");
+  console.log(persons);
   useEffect(() => {
     personService.getAll().then((response) => {
       setPersons(response.data);
     });
   }, []);
-  console.log(persons);
   const handleSubmit = (event) => {
     event.preventDefault();
-    persons.find((val) => val.name === newName)
-      ? alert(`${newName} is already added to phonebook`)
-      : persons.find((val) => val.number === newNumber)
-      ? alert(`${newNumber} is already added to phonebook`)
-      : setPersons([...persons, { name: newName, number: newNumber }]);
+    if (persons.find((val) => val.name === newName)) {
+      alert(`${newName} is already added to phonebook`);
+    } else if (persons.find((val) => val.number === newNumber)) {
+      alert(`${newNumber} is already added to phonebook`);
+    } else {
+      console.log(persons.length);
+      setPersons([
+        ...persons,
+        { name: newName, number: newNumber, id: `${persons.length + 1}` },
+      ]);
+      personService
+        .create({
+          name: newName,
+          number: newNumber,
+          id: `${persons.length + 1}`,
+        })
+        .then((res) => console.log(res.data));
+    }
     setNewName("");
     setNewNumber("");
   };
