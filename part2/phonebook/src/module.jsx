@@ -31,26 +31,21 @@ const PersonForm = (props) => {
     </form>
   );
 };
-const Persons = ({ search, persons }) => {
+const Persons = ({ search, persons, remove }) => {
+  let result =
+    search != ""
+      ? persons.filter((person) => person.name.toLowerCase().includes(search))
+      : persons;
   return (
     <ul>
-      {search != ""
-        ? persons
-            .filter((person) => person.name.toLowerCase().includes(search))
-            .map((person) => {
-              return (
-                <li key={person.id}>
-                  {person.name} {person.number}
-                </li>
-              );
-            })
-        : persons.map((person) => {
-            return (
-              <li key={person.id}>
-                {person.name} {person.number}
-              </li>
-            );
-          })}
+      {result.map((person) => {
+        return (
+          <li key={person.id}>
+            {person.name} {person.number}{" "}
+            <button onClick={() => remove(person)}>Delete</button>
+          </li>
+        );
+      })}
     </ul>
   );
 };

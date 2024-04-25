@@ -1,17 +1,34 @@
 import { useState, useEffect } from "react";
 import { Filter, PersonForm, Persons } from "./module";
 import personService from "./services/person";
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [search, setSearch] = useState("");
+  let temp = [];
   console.log(persons);
   useEffect(() => {
     personService.getAll().then((response) => {
       setPersons(response.data);
     });
   }, []);
+  const del = ({ name, id }) => {
+    if (window.confirm(`Delete ${name}`)) {
+      console.log(`Deleted ${name}`);
+      temp = persons
+        .filter((person) => person.id != id)
+        .map((person, index) => {
+          return { ...person, id: `${index + 1}` };
+        });
+      console.log(temp);
+      setPersons([...temp]);
+      personService.del(id, [...temp]);
+    } else {
+      console.log("Selected NO");
+    }
+  };
   const handleSubmit = (event) => {
     event.preventDefault();
     if (persons.find((val) => val.name === newName)) {
@@ -48,7 +65,7 @@ const App = () => {
         submit={handleSubmit}
       />
       <h2>Numbers</h2>
-      <Persons persons={persons} search={search} />
+      <Persons persons={persons} search={search} remove={del} />
     </div>
   );
 };
