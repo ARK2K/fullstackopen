@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Filter, PersonForm, Persons } from "./module";
+import { Filter, Notification, PersonForm, Persons } from "./module";
 import personService from "./services/person";
 
 const App = () => {
@@ -7,14 +7,23 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [search, setSearch] = useState("");
+  const [info, setInfo] = useState("");
+  const [isOn, setIsOn] = useState(false);
   let temp = [];
-  console.log(persons);
+  const Timeout = () => {
+    setIsOn(true);
+    setTimeout(() => {
+      setIsOn(false);
+      console.log("complete");
+    }, 5000);
+  };
   useEffect(() => {
     personService.getAll().then((response) => {
       setPersons(response.data);
     });
   }, []);
   const handleDelete = ({ name, id }) => {
+    setInfo(`Deleted ${name}`);
     if (window.confirm(`Delete ${name}`)) {
       console.log(`Deleted ${name}`);
       temp = persons
@@ -24,13 +33,13 @@ const App = () => {
         });
       console.log(temp);
       setPersons([...temp]);
+      Timeout();
       personService.del(id, [...temp]);
     }
   };
   const handleSubmit = (event) => {
     event.preventDefault();
-    temp = persons.filter((val) => val.name === newName)[0].id;
-    console.log(temp, "update");
+    temp = persons.filter((val) => val.name === newName)[0];
     if (persons.find((val) => val.name === newName)) {
       if (
         window.confirm(
@@ -38,23 +47,24 @@ const App = () => {
         )
       ) {
         personService
-          .update(temp, {
+          .update(temp.id, {
             name: newName,
             number: newNumber,
-            id: `${temp}`,
+            id: `${temp.id}`,
           })
           .then(() => {
             setPersons(
               persons.map((person) =>
                 person.id != temp
                   ? person
-                  : { name: newName, number: newNumber, id: `${temp}` }
+                  : { name: newName, number: newNumber, id: `${temp.id}` }
               )
             );
-          });
+          })
+          .then(() => Timeout());
+        setInfo(`Updated ${temp.name}`);
       }
     } else {
-      console.log(persons.length);
       setPersons([
         ...persons,
         { name: newName, number: newNumber, id: `${persons.length + 1}` },
@@ -65,7 +75,8 @@ const App = () => {
           number: newNumber,
           id: `${persons.length + 1}`,
         })
-        .then((res) => console.log(res.data));
+        .then(() => Timeout());
+      setInfo(`Added ${newName}`);
     }
     setNewName("");
     setNewNumber("");
@@ -73,6 +84,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      {isOn && <Notification message={info} />}
       <Filter searchprop={search} setprop={setSearch} />
       <h2>Add a new</h2>
       <PersonForm
