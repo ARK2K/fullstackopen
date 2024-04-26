@@ -14,7 +14,7 @@ const App = () => {
       setPersons(response.data);
     });
   }, []);
-  const del = ({ name, id }) => {
+  const handleDelete = ({ name, id }) => {
     if (window.confirm(`Delete ${name}`)) {
       console.log(`Deleted ${name}`);
       temp = persons
@@ -25,16 +25,34 @@ const App = () => {
       console.log(temp);
       setPersons([...temp]);
       personService.del(id, [...temp]);
-    } else {
-      console.log("Selected NO");
     }
   };
   const handleSubmit = (event) => {
     event.preventDefault();
+    temp = persons.filter((val) => val.name === newName)[0].id;
+    console.log(temp, "update");
     if (persons.find((val) => val.name === newName)) {
-      alert(`${newName} is already added to phonebook`);
-    } else if (persons.find((val) => val.number === newNumber)) {
-      alert(`${newNumber} is already added to phonebook`);
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, replace the old number with new one?`
+        )
+      ) {
+        personService
+          .update(temp, {
+            name: newName,
+            number: newNumber,
+            id: `${temp}`,
+          })
+          .then(() => {
+            setPersons(
+              persons.map((person) =>
+                person.id != temp
+                  ? person
+                  : { name: newName, number: newNumber, id: `${temp}` }
+              )
+            );
+          });
+      }
     } else {
       console.log(persons.length);
       setPersons([
@@ -65,7 +83,7 @@ const App = () => {
         submit={handleSubmit}
       />
       <h2>Numbers</h2>
-      <Persons persons={persons} search={search} remove={del} />
+      <Persons persons={persons} search={search} remove={handleDelete} />
     </div>
   );
 };
