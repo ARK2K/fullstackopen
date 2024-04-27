@@ -70,7 +70,6 @@ const App = () => {
               state: true,
               message: `Informaton of ${temp.name} has already been removed from server`,
             });
-            Timeout();
             setTimeout(() => {
               setError({ state: false, message: "" });
               console.log("complete");
