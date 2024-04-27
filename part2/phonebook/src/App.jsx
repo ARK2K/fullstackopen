@@ -9,6 +9,7 @@ const App = () => {
   const [search, setSearch] = useState("");
   const [info, setInfo] = useState("");
   const [isOn, setIsOn] = useState(false);
+  const [error, setError] = useState({ state: false, message: "" });
   let temp = [];
   const Timeout = () => {
     setIsOn(true);
@@ -55,13 +56,26 @@ const App = () => {
           .then(() => {
             setPersons(
               persons.map((person) =>
-                person.id != temp
+                person.id != temp.id
                   ? person
                   : { name: newName, number: newNumber, id: `${temp.id}` }
               )
             );
           })
-          .then(() => Timeout());
+          .then(() => Timeout())
+          .catch((er) => {
+            console.log(er);
+            setIsOn(false);
+            setError({
+              state: true,
+              message: `Informaton of ${temp.name} has already been removed from server`,
+            });
+            Timeout();
+            setTimeout(() => {
+              setError({ state: false, message: "" });
+              console.log("complete");
+            }, 5000);
+          });
         setInfo(`Updated ${temp.name}`);
       }
     } else {
@@ -84,8 +98,12 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      {isOn && <Notification message={info} />}
-      <Filter searchprop={search} setprop={setSearch} />
+      {error.state ? (
+        <Notification message={error.message} good={false} />
+      ) : (
+        isOn && <Notification message={info} good={true} />
+      )}
+      <Filter search={search} setSearch={setSearch} />
       <h2>Add a new</h2>
       <PersonForm
         name={newName}

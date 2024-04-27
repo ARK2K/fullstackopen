@@ -52,10 +52,11 @@ const Persons = ({ search, persons, remove }) => {
     </ul>
   );
 };
-const Notification = ({ message }) => {
+const Notification = ({ message, good }) => {
   if (message === null) {
     return null;
   }
-  return <div className="error">{message}</div>;
+  let val = good == true ? "success" : "error";
+  return <div className={val + " box"}>{message}</div>;
 };
 export { Filter, PersonForm, Persons, Notification };
