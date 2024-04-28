@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import countryService from "./services/countries";
-import { SingleCountry } from "./module";
+import { Collapsible, SingleCountry } from "./module";
 
 function App() {
   const [search, setSearch] = useState("");
   const [list, setList] = useState([]);
+
   useEffect(() => {
     countryService.getAll().then((response) => {
       setList(response.data);
@@ -35,8 +36,10 @@ function App() {
         <SingleCountry list={list} setList={setList} search={search} />
       ) : (
         <ul>
-          {result.map((item, index) => (
-            <li key={index}>{item.name.common}</li>
+          {result.map((item) => (
+            <li key={item.name.common}>
+              {item.name.common} <Collapsible item={item} />
+            </li>
           ))}
         </ul>
       )}
