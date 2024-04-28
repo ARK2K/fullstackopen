@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import countryService from "./services/countries";
 
 const SingleCountry = ({ search, setList, list }) => {
+  const [weather, setWeather] = useState([]);
   useEffect(() => {
     let result =
       search != ""
@@ -16,10 +17,15 @@ const SingleCountry = ({ search, setList, list }) => {
           setList([response.data]);
         }
       });
+    countryService.getWeather(list[0].capital[0]).then((res) => {
+      console.log(res.data);
+      setWeather(res.data);
+    });
   }, []);
   let lang = list[0].languages,
     flag = list[0].flags;
 
+  console.log(weather, "weather");
   return (
     <div>
       <h1>{list[0].name.common}</h1>
@@ -34,6 +40,9 @@ const SingleCountry = ({ search, setList, list }) => {
         ))}
       </ul>
       <img src={flag.png} alt={flag.alt} />
+      <h2>Weather in {list[0].capital}</h2>
+      <p>Temperature: {weather.length != 0 ? weather.main.temp : null} °C</p>
+      <p>Wind: {weather.length != 0 ? weather.wind.speed : null} m/s</p>
     </div>
   );
 };
