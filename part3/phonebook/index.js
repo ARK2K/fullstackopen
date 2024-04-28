@@ -55,8 +55,22 @@ app.delete("/api/persons/:id", (request, response) => {
   response.status(204).end();
 });
 
+function nameExists(name) {
+  return persons.some((entry) => entry.name === name);
+}
+
 app.post("/api/persons", (request, response) => {
   const maxId = persons.length > 0 ? Math.max(...persons.map((n) => n.id)) : 0;
+  const { name, number } = request.body;
+  if (!name || !number) {
+    return response.status(400).send({ error: "Missing name or number" });
+  }
+
+  if (nameExists(name)) {
+    return response
+      .status(409)
+      .send({ error: "Name already exists in phonebook" });
+  }
 
   const person = request.body;
   person.id = maxId + 1;

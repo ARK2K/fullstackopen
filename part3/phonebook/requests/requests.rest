@@ -17,3 +17,13 @@ Content-Type: application/json
     "name": "Mary Jane",
     "number": "93-23-6231422"
   }
+
+####
+
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+    "name": "Mary Poppendieck",
+    "number": "39-23-6423122"
+  }
