@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 
+const morgan = require("morgan");
+
 app.use(express.json());
 
 let persons = [
@@ -59,25 +61,23 @@ function nameExists(name) {
   return persons.some((entry) => entry.name === name);
 }
 
+app.use(morgan("tiny"));
+
 app.post("/api/persons", (request, response) => {
   const maxId = persons.length > 0 ? Math.max(...persons.map((n) => n.id)) : 0;
+
   const { name, number } = request.body;
   if (!name || !number) {
     return response.status(400).send({ error: "Missing name or number" });
   }
 
   if (nameExists(name)) {
-    return response
-      .status(409)
-      .send({ error: "Name already exists in phonebook" });
+    return response.status(409).send({ error: "Name already exists" });
   }
 
-  const person = request.body;
-  person.id = maxId + 1;
+  persons = [...persons, { name: name, number: number, id: maxId + 1 }];
 
-  persons = persons.concat(person);
-
-  response.json(person);
+  response.status(201).send({ message: "Entry created successfully" });
 });
 
 const PORT = 3001;
