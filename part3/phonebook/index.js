@@ -61,7 +61,17 @@ function nameExists(name) {
   return persons.some((entry) => entry.name === name);
 }
 
-app.use(morgan("tiny"));
+morgan.token("body", (req, res) => {
+  // Check if request has a body (avoids errors with requests without body)
+  if (req.body) {
+    return JSON.stringify(req.body);
+  }
+  return "";
+});
+
+app.use(
+  morgan(":method :url :status :res[content-length]  - :response-time ms :body")
+);
 
 app.post("/api/persons", (request, response) => {
   const maxId = persons.length > 0 ? Math.max(...persons.map((n) => n.id)) : 0;
@@ -77,7 +87,7 @@ app.post("/api/persons", (request, response) => {
 
   persons = [...persons, { name: name, number: number, id: maxId + 1 }];
 
-  response.status(201).send({ message: "Entry created successfully" });
+  response.status(200).send({ message: "Entry created successfully" });
 });
 
 const PORT = 3001;
