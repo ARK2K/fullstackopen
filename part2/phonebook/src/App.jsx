@@ -41,7 +41,7 @@ const App = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     temp = persons.filter((val) => val.name === newName)[0];
-    console.log(temp);
+    console.log(temp, "temp");
     if (persons.find((val) => val.name === newName)) {
       if (
         window.confirm(
@@ -55,6 +55,7 @@ const App = () => {
             id: `${temp.id}`,
           })
           .then(() => {
+            console.log(persons);
             setPersons(
               persons.map((person) =>
                 person.id != temp.id
@@ -63,6 +64,8 @@ const App = () => {
               )
             );
             Timeout();
+            setNewName("");
+            setNewNumber("");
           })
           .catch((er) => {
             console.log(er, "error");
@@ -74,6 +77,8 @@ const App = () => {
             setTimeout(() => {
               setError({ state: false, message: "" });
               console.log("complete");
+              setNewName("");
+              setNewNumber("");
             }, 5000);
           });
         setInfo(`Updated ${temp.name}`);
@@ -89,11 +94,15 @@ const App = () => {
           number: newNumber,
           id: `${persons.length + 1}`,
         })
-        .then(() => Timeout());
+        .then(() => {
+          Timeout();
+          setNewName("");
+          setNewNumber("");
+        });
       setInfo(`Added ${newName}`);
     }
-    setNewName("");
-    setNewNumber("");
+    // setNewName("");
+    // setNewNumber("");
   };
   return (
     <div>

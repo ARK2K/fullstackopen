@@ -10,7 +10,8 @@ const create = (newObject) => {
 };
 
 const update = (id, newObject) => {
-  return axios.post(`${baseUrl}/${id}`, newObject);
+  const req = axios.put(`${baseUrl}/${id}`, newObject);
+  return req.then((res) => res.data);
 };
 const del = (id, newObject) => {
   axios.delete(`${baseUrl}/${id}`, newObject).then((response) => {

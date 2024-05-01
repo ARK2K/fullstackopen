@@ -54,6 +54,22 @@ app.get("/api/persons/:id", (request, response) => {
   }
 });
 
+app.put("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const { name, number } = request.body;
+  const person = persons.find((person) => person.id === id);
+
+  persons = persons.map((person) =>
+    person.id === id ? { name: name, number: number, id: id } : person
+  );
+
+  if (person) {
+    response.json(persons);
+  } else {
+    response.status(404).end();
+  }
+});
+
 app.delete("/api/persons/:id", (request, response) => {
   const id = Number(request.params.id);
   persons = persons.filter((person) => person.id !== id);
@@ -68,7 +84,6 @@ function nameExists(name) {
 }
 
 morgan.token("body", (req, res) => {
-  // Check if request has a body (avoids errors with requests without body)
   if (req.body) {
     return JSON.stringify(req.body);
   }
