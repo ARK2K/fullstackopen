@@ -41,6 +41,7 @@ const App = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     temp = persons.filter((val) => val.name === newName)[0];
+    console.log(temp);
     if (persons.find((val) => val.name === newName)) {
       if (
         window.confirm(
@@ -61,10 +62,10 @@ const App = () => {
                   : { name: newName, number: newNumber, id: `${temp.id}` }
               )
             );
+            Timeout();
           })
-          .then(() => Timeout())
           .catch((er) => {
-            console.log(er);
+            console.log(er, "error");
             setIsOn(false);
             setError({
               state: true,
