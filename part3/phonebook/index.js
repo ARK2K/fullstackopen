@@ -1,12 +1,6 @@
 const express = require("express");
 const app = express();
 
-const morgan = require("morgan");
-
-app.use(express.json());
-
-app.use(express.static("dist"));
-
 let persons = [
   {
     id: 1,
@@ -29,6 +23,18 @@ let persons = [
     number: "39-23-6423122",
   },
 ];
+
+app.use(express.static("dist"));
+
+const cors = require("cors");
+
+app.use(cors());
+
+app.use(express.json());
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: "unknown endpoint" });
+};
 
 app.get("/api/persons", (request, response) => {
   response.json(persons);
@@ -58,6 +64,8 @@ app.delete("/api/persons/:id", (request, response) => {
 
   response.status(204).end();
 });
+
+const morgan = require("morgan");
 
 function nameExists(name) {
   return persons.some((entry) => entry.name === name);
@@ -91,6 +99,8 @@ app.post("/api/persons", (request, response) => {
 
   response.status(200).send({ message: "Entry created successfully" });
 });
+
+app.use(unknownEndpoint);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
