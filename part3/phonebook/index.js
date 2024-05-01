@@ -32,10 +32,6 @@ app.use(cors());
 
 app.use(express.json());
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: "unknown endpoint" });
-};
-
 app.get("/api/persons", (request, response) => {
   response.json(persons);
 });
@@ -99,8 +95,6 @@ app.post("/api/persons", (request, response) => {
 
   response.status(200).send({ message: "Entry created successfully" });
 });
-
-app.use(unknownEndpoint);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
