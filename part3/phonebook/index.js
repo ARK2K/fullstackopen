@@ -1,28 +1,8 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 
-let persons = [
-  {
-    id: 1,
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: 2,
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: 3,
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: 4,
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
-];
+const persons = require("./models/mongo");
 
 app.use(express.static("dist"));
 
@@ -33,7 +13,9 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/api/persons", (request, response) => {
-  response.json(persons);
+  persons.find({}).then((person) => {
+    response.json(person);
+  });
 });
 
 app.get("/info", (request, response) => {
@@ -44,14 +26,9 @@ app.get("/info", (request, response) => {
 });
 
 app.get("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const person = persons.find((person) => person.id === id);
-
-  if (person) {
+  persons.findById(request.params.id).then((person) => {
     response.json(person);
-  } else {
-    response.status(404).end();
-  }
+  });
 });
 
 app.put("/api/persons/:id", (request, response) => {
@@ -80,7 +57,7 @@ app.delete("/api/persons/:id", (request, response) => {
 const morgan = require("morgan");
 
 function nameExists(name) {
-  return persons.some((entry) => entry.name === name);
+  //return persons.some((entry) => entry.name === name);
 }
 
 morgan.token("body", (req, res) => {
@@ -95,8 +72,6 @@ app.use(
 );
 
 app.post("/api/persons", (request, response) => {
-  const maxId = persons.length > 0 ? Math.max(...persons.map((n) => n.id)) : 0;
-
   const { name, number } = request.body;
   if (!name || !number) {
     return response.status(400).send({ error: "Missing name or number" });
@@ -105,13 +80,14 @@ app.post("/api/persons", (request, response) => {
   if (nameExists(name)) {
     return response.status(409).send({ error: "Name already exists" });
   }
+  const person = new persons({ name: name, number: number });
 
-  persons = [...persons, { name: name, number: number, id: maxId + 1 }];
-
-  response.status(200).send({ message: "Entry created successfully" });
+  person.save().then((savedPerson) => {
+    response.json(savedPerson);
+  });
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
