@@ -7,7 +7,7 @@ GET http://localhost:3001/info
 
 ####
 
-DELETE http://localhost:3001/api/persons/6633d5f5e3ec6420eb1a1af3
+DELETE https://phonebook-nglx.onrender.com/api/persons/663491808849aeab57be9d6c
 
 ####
 
