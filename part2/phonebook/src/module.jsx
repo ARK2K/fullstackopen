@@ -56,7 +56,7 @@ const Notification = ({ message, good }) => {
   if (message === null) {
     return null;
   }
-  let val = good == true ? "success" : "error";
+  let val = good ? "success" : "error";
   return <div className={val + " box"}>{message}</div>;
 };
 export { Filter, PersonForm, Persons, Notification };
