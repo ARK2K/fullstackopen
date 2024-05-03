@@ -61,10 +61,6 @@ app.delete("/api/persons/:id", (request, response, next) => {
 
 const morgan = require("morgan");
 
-function nameExists(name) {
-  //return persons.some((entry) => entry.name === name);
-}
-
 morgan.token("body", (req, res) => {
   if (req.body) {
     return JSON.stringify(req.body);
@@ -82,9 +78,6 @@ app.post("/api/persons", (request, response) => {
     return response.status(400).send({ error: "Missing name or number" });
   }
 
-  if (nameExists(name)) {
-    return response.status(409).send({ error: "Name already exists" });
-  }
   const person = new persons({ name: name, number: number });
 
   person.save().then((savedPerson) => {
