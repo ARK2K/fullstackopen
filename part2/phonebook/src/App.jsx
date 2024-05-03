@@ -41,6 +41,7 @@ const App = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     temp = persons.filter((val) => val.name === newName)[0];
+    console.log(temp, "temp");
     if (persons.find((val) => val.name === newName)) {
       if (
         window.confirm(
@@ -54,6 +55,7 @@ const App = () => {
             id: `${temp.id}`,
           })
           .then(() => {
+            console.log(persons);
             setPersons(
               persons.map((person) =>
                 person.id != temp.id
@@ -61,39 +63,62 @@ const App = () => {
                   : { name: newName, number: newNumber, id: `${temp.id}` }
               )
             );
+            Timeout();
+            setNewName("");
+            setNewNumber("");
           })
-          .then(() => Timeout())
           .catch((er) => {
-            console.log(er);
+            console.log(er, "error");
             setIsOn(false);
             setError({
               state: true,
               message: `Informaton of ${temp.name} has already been removed from server`,
             });
-            Timeout();
             setTimeout(() => {
               setError({ state: false, message: "" });
               console.log("complete");
+              setNewName("");
+              setNewNumber("");
             }, 5000);
           });
         setInfo(`Updated ${temp.name}`);
       }
     } else {
-      setPersons([
-        ...persons,
-        { name: newName, number: newNumber, id: `${persons.length + 1}` },
-      ]);
       personService
         .create({
           name: newName,
           number: newNumber,
           id: `${persons.length + 1}`,
         })
-        .then(() => Timeout());
+        .then(() => {
+          Timeout();
+          setNewName("");
+          setNewNumber("");
+          setPersons([
+            ...persons,
+            { name: newName, number: newNumber, id: `${persons.length + 1}` },
+          ]);
+        })
+        .catch((error) => {
+          // this is the way to access the error message
+          console.log(error.response.data.error);
+          setIsOn(false);
+          setError({
+            state: true,
+            message: error.response.data.error,
+          });
+          setTimeout(() => {
+            setError({ state: false, message: "" });
+            console.log("complete");
+            setNewName("");
+            setNewNumber("");
+          }, 5000);
+        });
+
       setInfo(`Added ${newName}`);
     }
-    setNewName("");
-    setNewNumber("");
+    // setNewName("");
+    // setNewNumber("");
   };
   return (
     <div>
