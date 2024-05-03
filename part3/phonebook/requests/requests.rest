@@ -7,7 +7,7 @@ GET http://localhost:3001/info
 
 ####
 
-DELETE http://localhost:3001/api/persons/2
+DELETE http://localhost:3001/api/persons/6633d5f5e3ec6420eb1a1af3
 
 ####
 
@@ -28,3 +28,13 @@ Content-Type: application/json
     "name": "Mary Poppendieck",
     "number": "39-23-6423122"
   }
+
+####
+
+PUT http://localhost:3001/api/persons/663489dd21ae6a837d298ff6
+Content-Type: application/json
+
+{
+  "name": "Arto Hellas",
+  "number": "040-123456"
+}
