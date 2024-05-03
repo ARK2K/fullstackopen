@@ -84,10 +84,6 @@ const App = () => {
         setInfo(`Updated ${temp.name}`);
       }
     } else {
-      setPersons([
-        ...persons,
-        { name: newName, number: newNumber, id: `${persons.length + 1}` },
-      ]);
       personService
         .create({
           name: newName,
@@ -98,7 +94,27 @@ const App = () => {
           Timeout();
           setNewName("");
           setNewNumber("");
+          setPersons([
+            ...persons,
+            { name: newName, number: newNumber, id: `${persons.length + 1}` },
+          ]);
+        })
+        .catch((error) => {
+          // this is the way to access the error message
+          console.log(error.response.data.error);
+          setIsOn(false);
+          setError({
+            state: true,
+            message: error.response.data.error,
+          });
+          setTimeout(() => {
+            setError({ state: false, message: "" });
+            console.log("complete");
+            setNewName("");
+            setNewNumber("");
+          }, 5000);
         });
+
       setInfo(`Added ${newName}`);
     }
     // setNewName("");

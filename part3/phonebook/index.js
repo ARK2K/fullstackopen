@@ -38,12 +38,31 @@ app.get("/api/persons/:id", (request, response, next) => {
     .catch((error) => next(error));
 });
 
-app.put("/api/persons/:id", (request, response, next) => {
+function validatePhoneNumber(number) {
+  const pattern = /^\d{2,3}-\d{5,}$/; // Regex pattern for valid format
+  return pattern.test(number);
+}
+
+const validatePhone = (req, res, next) => {
+  const { number } = req.body; // Extract phone number from request body
+
+  if (!validatePhoneNumber(number)) {
+    return res.status(400).json({ error: "Invalid phone number format" });
+  }
+
+  next(); // Continue processing if validation passes
+};
+
+app.put("/api/persons/:id", validatePhone, (request, response, next) => {
   const { name, number } = request.body;
 
   const person = { name: name, number: number };
   persons
-    .findByIdAndUpdate(request.params.id, person, { new: true })
+    .findByIdAndUpdate(request.params.id, person, {
+      new: true,
+      runValidators: true,
+      context: "query",
+    })
     .then((updatedPerson) => {
       response.json(updatedPerson);
     })
@@ -72,7 +91,7 @@ app.use(
   morgan(":method :url :status :res[content-length]  - :response-time ms :body")
 );
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", validatePhone, (request, response, next) => {
   const { name, number } = request.body;
   if (!name || !number) {
     return response.status(400).send({ error: "Missing name or number" });
@@ -80,9 +99,12 @@ app.post("/api/persons", (request, response) => {
 
   const person = new persons({ name: name, number: number });
 
-  person.save().then((savedPerson) => {
-    response.json(savedPerson);
-  });
+  person
+    .save()
+    .then((savedPerson) => {
+      response.json(savedPerson);
+    })
+    .catch((error) => next(error));
 });
 
 const unknownEndpoint = (request, response) => {
@@ -96,6 +118,8 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
   }
 
   next(error);
