@@ -2,6 +2,13 @@ const { test, describe } = require("node:test");
 const assert = require("node:assert");
 const listHelper = require("../utils/list_helper");
 
+test("dummy returns one", () => {
+  const blogs = [];
+
+  const result = listHelper.dummy(blogs);
+  assert.strictEqual(result, 1);
+});
+
 describe("total likes", () => {
   const listWithOneBlog = [
     {
@@ -79,5 +86,44 @@ describe("total likes", () => {
   test("of a bigger list is calculated right", () => {
     const result = listHelper.totalLikes(blogs);
     assert.strictEqual(result, 36);
+  });
+});
+
+describe("favorite blog", () => {
+  test("of an empty list is none", () => {
+    const blogs = [];
+
+    const result = listHelper.favoriteBlog(blogs);
+    assert.strictEqual(result, null);
+  });
+
+  test("of a single blog is the only blog", () => {
+    const blogs = [
+      {
+        title: "Only Blog",
+        author: "John Doe",
+        likes: 10,
+      },
+    ];
+
+    const result = listHelper.favoriteBlog(blogs);
+    assert.deepStrictEqual(result, blogs[0]);
+  });
+
+  test("with many blogs picks the one with most likes", () => {
+    const blogs = [
+      { title: "First Blog", author: "Jane Doe", likes: 5 },
+      { title: "Second Blog", author: "John Doe", likes: 8 },
+      { title: "Third Blog", author: "Pete Doe", likes: 7 },
+    ];
+
+    const expectedFavorite = {
+      title: "Second Blog",
+      author: "John Doe",
+      likes: 8,
+    };
+
+    const result = listHelper.favoriteBlog(blogs);
+    assert.deepStrictEqual(result, expectedFavorite);
   });
 });
