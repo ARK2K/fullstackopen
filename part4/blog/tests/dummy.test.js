@@ -1,6 +1,7 @@
 const { test, describe } = require("node:test");
 const assert = require("node:assert");
 const listHelper = require("../utils/list_helper");
+const _ = require("lodash");
 
 test("dummy returns one", () => {
   const blogs = [];
@@ -125,5 +126,36 @@ describe("favorite blog", () => {
 
     const result = listHelper.favoriteBlog(blogs);
     assert.deepStrictEqual(result, expectedFavorite);
+  });
+});
+
+describe("most blogs", () => {
+  const blogs = [
+    { _id: "...", title: "...", author: "Robert C. Martin", likes: 10 },
+    { _id: "...", title: "...", author: "Edsger W. Dijkstra", likes: 5 },
+    { _id: "...", title: "...", author: "Robert C. Martin", likes: 7 },
+  ];
+
+  test("returns author with the most blogs", () => {
+    const result = listHelper.mostBlogs(blogs);
+    assert.deepStrictEqual(result, { author: "Robert C. Martin", blogs: 2 });
+  });
+
+  test("when list is empty, returns null", () => {
+    const emptyList = [];
+    const result = listHelper.mostBlogs(emptyList);
+    assert.strictEqual(result, null);
+  });
+
+  test("when multiple authors have the same most blogs, returns one of them", () => {
+    const tiedBlogs = [
+      { likes: 10, author: "John Doe" },
+      { likes: 5, author: "Jane Doe" },
+      { likes: 10, author: "John Doe" },
+    ];
+
+    const result = listHelper.mostBlogs(tiedBlogs);
+    assert.strictEqual(result.blogs, 2);
+    assert(typeof result.author === "string");
   });
 });
