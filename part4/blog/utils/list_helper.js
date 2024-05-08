@@ -33,6 +33,24 @@ const mostBlogs = (blogs) => {
   return topAuthor ? { author: topAuthor[0], blogs: topAuthor[1] } : null;
 };
 
+const mostLikes = (blogs) => {
+  const authorLikeCount = _.reduce(
+    blogs,
+    (acc, blog) => {
+      acc[blog.author] = (acc[blog.author] || 0) + blog.likes;
+      return acc;
+    },
+    {}
+  );
+
+  const topAuthor = _.maxBy(
+    Object.entries(authorLikeCount),
+    (authorLikes) => authorLikes[1]
+  );
+
+  return topAuthor ? { author: topAuthor[0], likes: topAuthor[1] } : null;
+};
+
 const dummy = (blogs) => {
   return 1;
 };
@@ -42,4 +60,5 @@ module.exports = {
   totalLikes,
   favoriteBlog,
   mostBlogs,
+  mostLikes,
 };

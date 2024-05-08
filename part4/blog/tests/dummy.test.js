@@ -159,3 +159,33 @@ describe("most blogs", () => {
     assert(typeof result.author === "string");
   });
 });
+
+describe("most likes", () => {
+  const blogs = [
+    { _id: "...", title: "...", author: "Edsger W. Dijkstra", likes: 7 },
+    { _id: "...", title: "...", author: "Robert C. Martin", likes: 10 },
+    { _id: "...", title: "...", author: "Edsger W. Dijkstra", likes: 10 },
+  ];
+
+  test("returns author with the most total likes", () => {
+    const result = listHelper.mostLikes(blogs);
+    assert.deepStrictEqual(result, { author: "Edsger W. Dijkstra", likes: 17 });
+  });
+
+  test("when list is empty, returns null", () => {
+    const emptyList = [];
+    const result = listHelper.mostLikes(emptyList);
+    assert.strictEqual(result, null);
+  });
+  test("when multiple authors have the same most total likes, returns one of them", () => {
+    const tiedBlogs = [
+      { likes: 10, author: "John Doe" },
+      { likes: 5, author: "Jane Doe" },
+      { likes: 10, author: "John Doe" },
+    ];
+
+    const result = listHelper.mostLikes(tiedBlogs);
+    assert.strictEqual(result.likes, 20);
+    assert(typeof result.author === "string");
+  });
+});
