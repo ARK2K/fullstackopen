@@ -42,14 +42,14 @@ describe.only("GET /api/blogs", () => {
 });
 
 describe.only("POST /api/blogs", () => {
-  const newBlog = {
-    title: "Test Blog Post",
-    author: "Jest Tester",
-    url: "https://jestjs.io/",
-    likes: 0,
-  };
+  test("creates a new blog post", async () => {
+    const newBlog = {
+      title: "Test Blog Post",
+      author: "Jest Tester",
+      url: "https://jestjs.io/",
+      likes: 0,
+    };
 
-  test.only("creates a new blog post", async () => {
     const initialBlogs = await api.get("/api/blogs").expect(200);
     await api
       .post("/api/blogs")
@@ -59,6 +59,21 @@ describe.only("POST /api/blogs", () => {
     const response = await api.get("/api/blogs");
 
     assert.strictEqual(response.body.length, initialBlogs.body.length + 1);
+  });
+  test.only("creates a new blog post with default likes", async () => {
+    const newBlog = {
+      title: "Test Blog Post",
+      author: "Jest Tester",
+      url: "https://jestjs.io/",
+    };
+
+    const response = await api
+      .post("/api/blogs")
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    assert.strictEqual(response.body.likes, 0);
   });
 });
 
