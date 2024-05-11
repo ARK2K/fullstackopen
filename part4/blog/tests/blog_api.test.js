@@ -60,7 +60,7 @@ describe.only("POST /api/blogs", () => {
 
     assert.strictEqual(response.body.length, initialBlogs.body.length + 1);
   });
-  test.only("creates a new blog post with default likes", async () => {
+  test("creates a new blog post with default likes", async () => {
     const newBlog = {
       title: "Test Blog Post",
       author: "Jest Tester",
@@ -74,6 +74,28 @@ describe.only("POST /api/blogs", () => {
       .expect("Content-Type", /application\/json/);
 
     assert.strictEqual(response.body.likes, 0);
+  });
+
+  test.only("responds with 400 if title is missing", async () => {
+    const newBlog = {
+      author: "Jest Tester",
+      url: "https://jestjs.io/",
+    };
+
+    const response = await api.post("/api/blogs").send(newBlog).expect(400);
+
+    assert("error" in response.body);
+  });
+
+  test.only("responds with 400 if url is missing", async () => {
+    const newBlog = {
+      title: "Test Blog Post",
+      author: "Jest Tester",
+    };
+
+    const response = await api.post("/api/blogs").send(newBlog).expect(400);
+
+    assert("error" in response.body);
   });
 });
 

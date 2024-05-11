@@ -30,14 +30,22 @@ app.get("/api/blogs", async (request, response) => {
   }
 });
 
-app.post("/api/blogs", async (request, response) => {
+const validateBlog = (req, res, next) => {
+  const { title, url } = req.body;
+  if (!title || !url) {
+    return res.status(400).json({ error: "Missing required property" });
+  }
+  next();
+};
+
+app.post("/api/blogs", validateBlog, async (request, response) => {
   try {
     const blog = new Blog(request.body);
     const savedBlog = await blog.save();
     response.status(201).json(savedBlog);
   } catch (error) {
     console.error(error);
-    response.status(400).send("Error creating blog post");
+    response.status(500).json({ error: "Internal server error" });
   }
 });
 
