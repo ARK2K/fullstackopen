@@ -30,12 +30,15 @@ app.get("/api/blogs", async (request, response) => {
   }
 });
 
-app.post("/api/blogs", (request, response) => {
-  const blog = new Blog(request.body);
-  console.log(request);
-  blog.save().then((result) => {
-    response.status(201).json(result);
-  });
+app.post("/api/blogs", async (request, response) => {
+  try {
+    const blog = new Blog(request.body);
+    const savedBlog = await blog.save();
+    response.status(201).json(savedBlog);
+  } catch (error) {
+    console.error(error);
+    response.status(400).send("Error creating blog post");
+  }
 });
 
 module.exports = app;
