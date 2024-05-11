@@ -51,7 +51,11 @@ describe.only("POST /api/blogs", () => {
 
   test.only("creates a new blog post", async () => {
     const initialBlogs = await api.get("/api/blogs").expect(200);
-    await api.post("/api/blogs").send(newBlog).expect(201);
+    await api
+      .post("/api/blogs")
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
     const response = await api.get("/api/blogs");
 
     assert.strictEqual(response.body.length, initialBlogs.body.length + 1);
