@@ -20,10 +20,14 @@ mongoose
 app.use(cors());
 app.use(express.json());
 
-app.get("/api/blogs", (request, response) => {
-  Blog.find({}).then((blogs) => {
+app.get("/api/blogs", async (request, response) => {
+  try {
+    const blogs = await Blog.find({});
     response.json(blogs);
-  });
+  } catch (error) {
+    console.error(error);
+    response.status(500).send("Error retrieving blogs");
+  }
 });
 
 app.post("/api/blogs", (request, response) => {
