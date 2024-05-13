@@ -49,4 +49,17 @@ app.post("/api/blogs", validateBlog, async (request, response) => {
   }
 });
 
+app.delete("/api/blogs/:id", async (req, res) => {
+  try {
+    const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
+    if (!deletedBlog) {
+      return res.status(404).send("Blog post not found");
+    }
+    res.status(204).send(); // No content response for successful deletion
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 module.exports = app;
