@@ -62,4 +62,20 @@ app.delete("/api/blogs/:id", async (req, res) => {
   }
 });
 
+app.put("/api/blogs/:id", async (req, res) => {
+  const { likes } = req.body;
+  try {
+    const blog = await Blog.findByIdAndUpdate(req.params.id, { likes: likes });
+
+    if (!blog) {
+      return res.status(404).json({ message: "Blog post not found" });
+    }
+
+    return res.status(200).json(blog);
+  } catch (error) {
+    console.error("Error updating blog post:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 module.exports = app;

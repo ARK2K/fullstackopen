@@ -61,9 +61,8 @@ describe("POST /api/blogs", () => {
       .expect("Content-Type", /application\/json/);
     const response = await api.get("/api/blogs");
     assert.strictEqual(response.body.length, initialBlogs.body.length + 1);
-    done();
-    return newBlog;
   });
+
   test("creates a new blog post with default likes", async () => {
     const newBlog = {
       title: "Test Blog Post",
@@ -103,13 +102,13 @@ describe("POST /api/blogs", () => {
   });
 });
 
-describe.only("DELETE /api/blogs/:id", () => {
-  test.only("returns 404 for non-existent blog post", async () => {
+describe("DELETE /api/blogs/:id", () => {
+  test("returns 404 for non-existent blog post", async () => {
     const nonExistentId = "invalid-blog-id";
     await api.delete(`/api/blogs/${nonExistentId}`).expect(404);
   });
 
-  test.only("deletes a blog post and returns 204", async () => {
+  test("deletes a blog post and returns 204", async () => {
     const newBlog = {
       title: "Test Blog Post",
       author: "Jest Tester",
@@ -136,6 +135,33 @@ describe.only("DELETE /api/blogs/:id", () => {
     } catch (error) {
       console.log("createdBlogId", createdBlogId);
     }
+  });
+});
+
+describe.only("Blog post update functionality", () => {
+  test.only("updates the number of likes for a blog post", async () => {
+    let newLikes = 15,
+      blogId = "433bcb2d-cd3a-4bea-9e88-f4a2521eebb2";
+    const response = await api
+      .put(`/api/blogs/${blogId}`)
+      .send({ likes: newLikes });
+
+    assert.strictEqual(response.statusCode, 200, "Status code should be 200");
+
+    assert.deepStrictEqual(
+      response.body.likes,
+      newLikes,
+      "Likes should match updated value"
+    );
+  });
+  test.only("returns 404 for non-existent blog post ID", async () => {
+    let blogId = "invalid_id",
+      newLikes = 15;
+    const response = await api
+      .put(`/api/blogs/${blogId}`)
+      .send({ likes: newLikes });
+
+    assert.strictEqual(response.statusCode, 404, "Status code should be 404");
   });
 });
 
