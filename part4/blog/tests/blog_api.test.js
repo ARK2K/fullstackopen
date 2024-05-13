@@ -49,6 +49,7 @@ describe("POST /api/blogs", () => {
       author: "Jest Tester",
       url: "https://jestjs.io/",
       likes: 0,
+      _id: uuid.v4(),
     };
 
     const initialBlogs = await api.get("/api/blogs").expect(200);
