@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const uuid = require("uuid");
 
 mongoose.set("strictQuery", false);
 
@@ -19,15 +20,7 @@ const blogSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  _id: { type: String, required: true, unique: true },
-});
-
-blogSchema.set("toJSON", {
-  transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString();
-    delete returnedObject._id;
-    delete returnedObject.__v;
-  },
+  _id: { type: String, required: true, default: () => uuid.v4() },
 });
 
 module.exports = mongoose.model("Blog", blogSchema);
