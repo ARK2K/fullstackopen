@@ -3,7 +3,6 @@ const Blog = require("../models/blog");
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const app = require("../app");
-const uuid = require("uuid");
 
 const assert = require("node:assert");
 
@@ -49,7 +48,6 @@ describe("POST /api/blogs", () => {
       author: "Jest Tester",
       url: "https://jestjs.io/",
       likes: 0,
-      _id: uuid.v4(),
     };
 
     const initialBlogs = await api.get("/api/blogs").expect(200);
