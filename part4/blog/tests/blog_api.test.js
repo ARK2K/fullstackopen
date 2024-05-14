@@ -112,7 +112,6 @@ describe("DELETE /api/blogs/:id", () => {
       author: "Jest Tester",
       url: "https://jestjs.io/",
       likes: 0,
-      _id: uuid.v4(),
     };
     await api
       .post("/api/blogs")
