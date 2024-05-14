@@ -4,8 +4,10 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const logger = require("./utils/logger");
 const config = require("./utils/config");
+const bcrypt = require("bcrypt");
 
 const Blog = require("./models/blog");
+const User = require("./models/user");
 
 const mongoUrl = config.MONGODB_URI;
 mongoose
@@ -75,6 +77,65 @@ app.put("/api/blogs/:id", async (req, res) => {
   } catch (error) {
     console.error("Error updating blog post:", error);
     return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+async function getAllUsers() {
+  try {
+    const users = await User.find({}, { username: 1, name: 1, _id: 1 }); // Projection object
+    return users;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return null;
+  }
+}
+
+app.get("/api/users", async (req, res) => {
+  try {
+    const users = await getAllUsers();
+    if (users) {
+      res.status(200).json(users);
+    } else {
+      res.status(404).json({ message: "No users found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+async function createUser(username, password, name) {
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  const newUser = new User({
+    username,
+    password: hashedPassword,
+    name,
+  });
+
+  try {
+    const savedUser = await newUser.save();
+    return savedUser;
+  } catch (error) {
+    console.error("Error creating user:", error);
+    return null;
+  }
+}
+
+app.post("/api/users", async (req, res) => {
+  const { username, password, name } = req.body;
+
+  try {
+    const newUser = await createUser(username, password, name);
+    if (newUser) {
+      res.status(201).json({ message: "User created successfully!" });
+    } else {
+      res.status(500).json({ message: "Error creating user" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 

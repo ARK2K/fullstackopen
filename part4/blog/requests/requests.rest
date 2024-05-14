@@ -11,3 +11,13 @@ Content-Type: application/json
   "url": "https://www.nintendo.com/us/",
   "likes": 531
 }
+
+####
+POST http://localhost:3003/api/users
+Content-Type: application/json
+
+{
+    "username": "hellas",
+    "password": "hellas@123", 
+    "name": "Arto Hellas"
+  }
