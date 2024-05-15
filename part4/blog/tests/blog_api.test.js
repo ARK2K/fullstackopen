@@ -135,8 +135,8 @@ describe("DELETE /api/blogs/:id", () => {
   });
 });
 
-describe.only("Blog post update functionality", () => {
-  test.only("updates the number of likes for a blog post", async () => {
+describe("Blog post update functionality", () => {
+  test("updates the number of likes for a blog post", async () => {
     let newLikes = 15,
       blogId = "433bcb2d-cd3a-4bea-9e88-f4a2521eebb2";
     const response = await api
@@ -151,7 +151,7 @@ describe.only("Blog post update functionality", () => {
       "Likes should match updated value"
     );
   });
-  test.only("returns 404 for non-existent blog post ID", async () => {
+  test("returns 404 for non-existent blog post ID", async () => {
     let blogId = "invalid_id",
       newLikes = 15;
     const response = await api

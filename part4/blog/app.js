@@ -105,6 +105,15 @@ app.get("/api/users", async (req, res) => {
 });
 
 async function createUser(username, password, name) {
+  if (!username || !password || username.length < 3 || password.length < 3) {
+    throw new Error("Username and password must be at least 3 characters long");
+  }
+
+  const existingUser = await User.findOne({ username });
+  if (existingUser) {
+    throw new Error("Username already exists");
+  }
+
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -119,7 +128,7 @@ async function createUser(username, password, name) {
     return savedUser;
   } catch (error) {
     console.error("Error creating user:", error);
-    return null;
+    return error;
   }
 }
 
@@ -128,14 +137,10 @@ app.post("/api/users", async (req, res) => {
 
   try {
     const newUser = await createUser(username, password, name);
-    if (newUser) {
-      res.status(201).json({ message: "User created successfully!" });
-    } else {
-      res.status(500).json({ message: "Error creating user" });
-    }
+    res.status(201).json({ message: "User created successfully!" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(400).json({ message: error.message });
   }
 });
 
