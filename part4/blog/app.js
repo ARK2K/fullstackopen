@@ -136,7 +136,7 @@ app.post("/api/users", async (req, res) => {
   const { username, password, name } = req.body;
 
   try {
-    const newUser = await createUser(username, password, name);
+    await createUser(username, password, name);
     res.status(201).json({ message: "User created successfully!" });
   } catch (error) {
     console.error(error);
