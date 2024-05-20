@@ -4,32 +4,21 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const logger = require("./utils/logger");
 const config = require("./utils/config");
-const bcrypt = require("bcrypt");
+const { Blog, User } = require("./models/models");
 
-const Blog = require("./models/blog");
-const User = require("./models/user");
-
-const mongoUrl = config.MONGODB_URI;
 mongoose
-  .connect(mongoUrl)
-  .then(() => {
-    logger.info("connected to MongoDB");
-  })
-  .catch((error) => {
-    logger.error("error connecting to MongoDB:", error.message);
-  });
+  .connect(config.MONGODB_URI)
+  .then(() => logger.info("connected to MongoDB"))
+  .catch((error) =>
+    logger.error("error connecting to MongoDB:", error.message)
+  );
 
 app.use(cors());
 app.use(express.json());
 
-app.get("/api/blogs", async (request, response) => {
-  try {
-    const blogs = await Blog.find({});
-    response.json(blogs);
-  } catch (error) {
-    console.error(error);
-    response.status(500).send("Error retrieving blogs");
-  }
+app.get("/api/blogs", async (req, res) => {
+  const blogs = await Blog.find({}).populate("user");
+  res.json(blogs.map((blog) => blog.toJSON()));
 });
 
 const validateBlog = (req, res, next) => {
@@ -40,34 +29,55 @@ const validateBlog = (req, res, next) => {
   next();
 };
 
-app.post("/api/blogs", validateBlog, async (request, response) => {
+const createBlog = async (title, author, url) => {
+  const firstUser = await User.findOne(); // Find the first user
+  if (!firstUser) {
+    throw new Error("No users found to assign as creator");
+  }
+
+  const newBlog = new Blog({
+    title,
+    url,
+    author,
+    user: firstUser._id, // Assign the first user's ID as creator
+  });
+
+  return await newBlog.save();
+};
+
+app.post("/api/blogs", validateBlog, async (req, res, next) => {
   try {
-    const blog = new Blog(request.body);
-    const savedBlog = await blog.save();
-    response.status(201).json(savedBlog);
+    const { title, url, author } = req.body;
+    const newBlog = await createBlog(title, author, url);
+    res.status(201).json(newBlog);
   } catch (error) {
-    console.error(error);
-    response.status(500).json({ error: "Internal server error" });
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ error: error.message });
+    }
+    next(error);
   }
 });
 
 app.delete("/api/blogs/:id", async (req, res) => {
-  try {
-    const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
-    if (!deletedBlog) {
-      return res.status(404).send("Blog post not found");
-    }
-    res.status(204).send(); // No content response for successful deletion
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
+  const id = req.params.id;
+  console.log(`Deleting blog with ID: ${id}`);
+  const result = await Blog.findByIdAndDelete(id);
+  if (result) {
+    res.status(204).end();
+  } else {
+    console.log(`Blog not found with ID: ${id}`);
+    res.status(404).json({ error: "Blog not found" });
   }
 });
 
 app.put("/api/blogs/:id", async (req, res) => {
   const { likes } = req.body;
   try {
-    const blog = await Blog.findByIdAndUpdate(req.params.id, { likes: likes });
+    const blog = await Blog.findByIdAndUpdate(
+      req.params.id,
+      { likes },
+      { new: true }
+    );
 
     if (!blog) {
       return res.status(404).json({ message: "Blog post not found" });
@@ -80,68 +90,51 @@ app.put("/api/blogs/:id", async (req, res) => {
   }
 });
 
-async function getAllUsers() {
-  try {
-    const users = await User.find({}, { username: 1, name: 1, _id: 1 }); // Projection object
-    return users;
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    return null;
-  }
-}
+// Create a new user
+app.post("/api/users", async (req, res) => {
+  const { username, name, password } = req.body;
 
-app.get("/api/users", async (req, res) => {
-  try {
-    const users = await getAllUsers();
-    if (users) {
-      res.status(200).json(users);
-    } else {
-      res.status(404).json({ message: "No users found" });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-async function createUser(username, password, name) {
   if (!username || !password || username.length < 3 || password.length < 3) {
-    throw new Error("Username and password must be at least 3 characters long");
+    return res
+      .status(400)
+      .json({
+        error: "Username and password must be at least 3 characters long.",
+      });
   }
 
   const existingUser = await User.findOne({ username });
   if (existingUser) {
-    throw new Error("Username already exists");
+    return res.status(400).json({ error: "Username must be unique." });
   }
 
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
+  const passwordHash = await User.hashPassword(password);
 
   const newUser = new User({
     username,
-    password: hashedPassword,
     name,
+    passwordHash,
   });
 
-  try {
-    const savedUser = await newUser.save();
-    return savedUser;
-  } catch (error) {
-    console.error("Error creating user:", error);
-    return error;
-  }
-}
+  const savedUser = await newUser.save();
 
-app.post("/api/users", async (req, res) => {
-  const { username, password, name } = req.body;
+  res
+    .status(201)
+    .json({
+      username: savedUser.username,
+      name: savedUser.name,
+      id: savedUser._id,
+    });
+});
 
-  try {
-    await createUser(username, password, name);
-    res.status(201).json({ message: "User created successfully!" });
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({ message: error.message });
-  }
+app.get("/api/users", async (req, res) => {
+  const users = await User.find({});
+  res.json(
+    users.map((user) => ({
+      username: user.username,
+      name: user.name,
+      id: user._id,
+    }))
+  );
 });
 
 module.exports = app;

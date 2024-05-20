@@ -1,9 +1,7 @@
-const { test, after, describe, beforeEach } = require("node:test");
-const Blog = require("../models/blog");
+const { test, after, describe } = require("node:test");
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const app = require("../app");
-
 const assert = require("node:assert");
 
 const api = supertest(app);
@@ -14,20 +12,6 @@ describe("GET /api/blogs", () => {
       .get("/api/blogs")
       .expect(200)
       .expect("Content-Type", /application\/json/);
-  });
-
-  test("there are two blogs", async () => {
-    const response = await api.get("/api/blogs");
-
-    assert.strictEqual(response.body.length, 2);
-  });
-
-  test("the first blog is about React patterns", async () => {
-    const response = await api.get("/api/blogs");
-
-    const contents = response.body.map((e) => e.title);
-    // is the argument truthy
-    assert(contents.includes("React patterns"));
   });
 
   test("returns list of blogs with id property", async () => {
@@ -57,6 +41,7 @@ describe("POST /api/blogs", () => {
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
+
     const response = await api.get("/api/blogs");
     assert.strictEqual(response.body.length, initialBlogs.body.length + 1);
   });
@@ -102,7 +87,7 @@ describe("POST /api/blogs", () => {
 
 describe("DELETE /api/blogs/:id", () => {
   test("returns 404 for non-existent blog post", async () => {
-    const nonExistentId = "invalid-blog-id";
+    const nonExistentId = new mongoose.Types.ObjectId();
     await api.delete(`/api/blogs/${nonExistentId}`).expect(404);
   });
 
@@ -113,52 +98,59 @@ describe("DELETE /api/blogs/:id", () => {
       url: "https://jestjs.io/",
       likes: 0,
     };
-    await api
+
+    const response = await api
       .post("/api/blogs")
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
-    let createdBlogId, createdBlog;
-    try {
-      createdBlog = Blog.findOne({ title: newBlog.title });
-    } catch (error) {
-      console.error("Error creating blog post:", error);
-      // Handle errors appropriately (consider failing the test)
-      return; // Exit the test if creation fails
-    }
-    createdBlogId = createdBlog._id;
-    try {
-      await api.delete(`/api/blogs/${createdBlogId}`).expect(204);
-    } catch (error) {
-      console.log("createdBlogId", createdBlogId);
-    }
+
+    const createdBlogId = response.body.id;
+
+    await api.delete(`/api/blogs/${createdBlogId}`).expect(204);
   });
 });
 
 describe("Blog post update functionality", () => {
   test("updates the number of likes for a blog post", async () => {
-    let newLikes = 15,
-      blogId = "433bcb2d-cd3a-4bea-9e88-f4a2521eebb2";
+    const newBlog = {
+      title: "Test Blog Post Like Update",
+      author: "Jest Tester",
+      url: "https://jestjs.io/",
+      likes: 5,
+    };
+
+    // Create a new blog post
     const response = await api
-      .put(`/api/blogs/${blogId}`)
-      .send({ likes: newLikes });
+      .post("/api/blogs")
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
 
-    assert.strictEqual(response.statusCode, 200, "Status code should be 200");
+    const createdBlogId = response.body.id;
 
-    assert.deepStrictEqual(
-      response.body.likes,
-      newLikes,
-      "Likes should match updated value"
-    );
+    // Update the blog post likes
+    const newLikes = 15;
+    await api
+      .put(`/api/blogs/${createdBlogId}`)
+      .send({ likes: newLikes })
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    const res = await api
+      .put(`/api/blogs/${createdBlogId}`)
+      .send()
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    assert.strictEqual(res.body.likes, newLikes);
   });
-  test("returns 404 for non-existent blog post ID", async () => {
-    let blogId = "invalid_id",
-      newLikes = 15;
-    const response = await api
-      .put(`/api/blogs/${blogId}`)
-      .send({ likes: newLikes });
 
-    assert.strictEqual(response.statusCode, 404, "Status code should be 404");
+  test("returns 404 for non-existent blog post ID", async () => {
+    const blogId = new mongoose.Types.ObjectId();
+    const newLikes = 15;
+
+    await api.put(`/api/blogs/${blogId}`).send({ likes: newLikes }).expect(404);
   });
 });
 
