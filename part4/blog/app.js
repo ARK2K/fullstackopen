@@ -5,6 +5,8 @@ const mongoose = require("mongoose");
 const logger = require("./utils/logger");
 const config = require("./utils/config");
 const { Blog, User } = require("./models/models");
+const jwt = require("jsonwebtoken");
+const { tokenExtractor, userExtractor } = require("./utils/webtoken");
 
 mongoose
   .connect(config.MONGODB_URI)
@@ -29,7 +31,7 @@ const validateBlog = (req, res, next) => {
   next();
 };
 
-const createBlog = async (title, author, url) => {
+const createBlog = async (title, author, url, likes) => {
   const firstUser = await User.findOne(); // Find the first user
   if (!firstUser) {
     throw new Error("No users found to assign as creator");
@@ -39,6 +41,7 @@ const createBlog = async (title, author, url) => {
     title,
     url,
     author,
+    likes,
     user: firstUser._id, // Assign the first user's ID as creator
   });
 
@@ -52,30 +55,46 @@ const createBlog = async (title, author, url) => {
   return savedBlog;
 };
 
-app.post("/api/blogs", validateBlog, async (req, res, next) => {
-  try {
-    const { title, url, author } = req.body;
-    const newBlog = await createBlog(title, author, url);
-    res.status(201).json(newBlog);
-  } catch (error) {
-    if (error.name === "ValidationError") {
-      return res.status(400).json({ error: error.message });
+app.post(
+  "/api/blogs",
+  validateBlog,
+  tokenExtractor,
+  userExtractor,
+  async (req, res, next) => {
+    try {
+      const { title, url, author, likes } = req.body;
+      const newBlog = await createBlog(title, author, url, likes);
+      res.status(201).json(newBlog);
+    } catch (error) {
+      if (error.name === "ValidationError") {
+        return res.status(400).json({ error: error.message });
+      }
+      next(error);
     }
-    next(error);
   }
-});
+);
 
-app.delete("/api/blogs/:id", async (req, res) => {
-  const id = req.params.id;
-  console.log(`Deleting blog with ID: ${id}`);
-  const result = await Blog.findByIdAndDelete(id);
-  if (result) {
+app.delete(
+  "/api/blogs/:id",
+  tokenExtractor,
+  userExtractor,
+  async (req, res) => {
+    const id = req.params.id;
+    console.log(`Deleting blog with ID: ${id}`);
+    const blog = await Blog.findById(id);
+    if (!blog) {
+      return res.status(404).json({ error: "blog not found" });
+    }
+
+    const user = req.user;
+    if (blog.user.toString() !== user._id.toString()) {
+      return res.status(401).json({ error: "unauthorized" });
+    }
+
+    await Blog.findByIdAndDelete(id);
     res.status(204).end();
-  } else {
-    console.log(`Blog not found with ID: ${id}`);
-    res.status(404).json({ error: "Blog not found" });
   }
-});
+);
 
 app.put("/api/blogs/:id", async (req, res) => {
   const { likes } = req.body;
@@ -134,6 +153,29 @@ app.get("/api/users", async (req, res) => {
     id: 1,
   });
   res.json(users);
+});
+
+app.post("/api/login", async (req, res) => {
+  const { username, password } = req.body;
+
+  const user = await User.findOne({ username: username });
+  if (!user) {
+    return res.status(401).json({ error: "invalid username or password" });
+  }
+
+  const passwordValid = await user.validatePassword(password);
+  if (!passwordValid) {
+    return res.status(401).json({ error: "invalid username or password" });
+  }
+
+  const userForToken = {
+    username: user.username,
+    id: user._id,
+  };
+
+  const token = jwt.sign(userForToken, process.env.SECRET);
+
+  res.status(200).json({ token, username: user.username, name: user.name });
 });
 
 module.exports = app;
