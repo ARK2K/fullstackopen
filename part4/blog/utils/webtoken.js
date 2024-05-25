@@ -1,10 +1,12 @@
 const jwt = require("jsonwebtoken");
 const { User } = require("../models/models");
 
-const tokenExtractor = (req, res, next) => {
-  const authorization = req.get("authorization");
+const tokenExtractor = (request, response, next) => {
+  const authorization = request.get("Authorization");
   if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
-    req.token = authorization.substring(7);
+    request.token = authorization.substring(7);
+  } else {
+    request.token = null;
   }
   next();
 };

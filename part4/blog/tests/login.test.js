@@ -1,4 +1,4 @@
-/*const { test, describe, beforeEach, after } = require("node:test");
+const { test, describe, beforeEach, after } = require("node:test");
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const app = require("../app");
@@ -54,4 +54,3 @@ describe("Login and Token Authentication", () => {
     await mongoose.connection.close();
   });
 });
-*/

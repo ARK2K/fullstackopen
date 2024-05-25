@@ -1,4 +1,4 @@
-/*const { test, describe, beforeEach, after } = require("node:test");
+const { test, describe, beforeEach, after } = require("node:test");
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const bcrypt = require("bcrypt");
@@ -66,4 +66,3 @@ describe("Blog creation and population", () => {
     await mongoose.connection.close();
   });
 });
-*/
