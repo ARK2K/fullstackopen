@@ -39,19 +39,36 @@ describe("Blog creation and population", () => {
       likes: 0,
     };
 
+    // Make a request to your login endpoint to get a token
+    const loginResponse = await api
+      .post("/api/login")
+      .send({ username: "testuser", password: "password" });
+
+    console.log("Login Response:", loginResponse.body); // Check the entire login response body
+
+    // Extract the token from the login response
+    const token = loginResponse.body.token;
+
+    console.log("Token:", token); // Check the extracted token
+
+    // Use the token in your request to create a new blog post
     const response = await api
       .post("/api/blogs")
       .set("Authorization", `Bearer ${token}`)
-      .send(newBlog)
-      .expect(201)
-      .expect("Content-Type", /application\/json/);
+      .send(newBlog);
+
+    console.log("Response status:", response.status); // Check the response status code
+    console.log("Response body:", response.body); // Check the response body for any error messages
+
+    assert.equal(response.status, 201);
+    assert.ok(response.body.hasOwnProperty("id"));
 
     const blogId = response.body.id;
     const blog = await Blog.findById(blogId).populate("user", {
       username: 1,
       name: 1,
     });
-    assert.strictEqual(blog.user.username, "testuser");
+    assert.equal(blog.user.username, "testuser");
   });
 
   test("lists all users with blogs", async () => {
@@ -71,6 +88,21 @@ describe("Blog creation and population", () => {
 
     const response = await api.get("/api/users").expect(200);
     assert(response.body[0].blogs.length > 0);
+  });
+
+  test("fails to create a new blog post without token", async () => {
+    const newBlog = {
+      title: "Test Blog Post",
+      author: "Jest Tester",
+      url: "https://jestjs.io/",
+      likes: 0,
+    };
+
+    await api
+      .post("/api/blogs")
+      .send(newBlog)
+      .expect(401)
+      .expect("Content-Type", /application\/json/);
   });
 
   after(async () => {

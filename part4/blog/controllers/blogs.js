@@ -1,9 +1,14 @@
 const express = require("express");
-const { Blog, User } = require("../models/models");
+const { Blog } = require("../models/models");
 const jwt = require("jsonwebtoken");
 const { userExtractor } = require("../utils/webtoken");
 
 const blogsRouter = express.Router();
+
+blogsRouter.get("/", async (req, res) => {
+  const blogs = await Blog.find({}).populate("user", { blogs: 0 });
+  res.json(blogs);
+});
 
 const validateBlog = (req, res, next) => {
   const { title, url } = req.body;
@@ -13,17 +18,16 @@ const validateBlog = (req, res, next) => {
   next();
 };
 
-blogsRouter.get("/", async (req, res) => {
-  const blogs = await Blog.find({}).populate("user", { blogs: 0 });
-  res.json(blogs);
-});
-
 blogsRouter.post("/", validateBlog, userExtractor, async (req, res, next) => {
   const { title, url, author, likes } = req.body;
   try {
+    if (!req.token) {
+      return res.status(401).json({ error: "Token missing" });
+    }
     const decodedToken = jwt.verify(req.token, process.env.SECRET);
-    if (!req.token || !decodedToken.id) {
-      return res.status(401).json({ error: "token missing or invalid" });
+    console.log("Decoded Token", decodedToken);
+    if (!decodedToken.id) {
+      return res.status(401).json({ error: "Token invalid" });
     }
 
     const user = req.user;
