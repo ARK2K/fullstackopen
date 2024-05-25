@@ -1,14 +1,17 @@
-/*const { test, describe, beforeEach, after } = require("node:test");
+const { test, describe, beforeEach, after } = require("node:test");
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const app = require("../app");
-const { User, Blog } = require("../models/models");
+const { Blog, User } = require("../models/models");
 const assert = require("node:assert");
 
 const api = supertest(app);
 
 describe("Blog creation and population", () => {
+  let token;
+
   beforeEach(async () => {
     await User.deleteMany({});
     await Blog.deleteMany({});
@@ -18,7 +21,14 @@ describe("Blog creation and population", () => {
       name: "Test User",
       passwordHash,
     });
-    await user.save();
+    const savedUser = await user.save();
+
+    const userForToken = {
+      username: savedUser.username,
+      id: savedUser._id,
+    };
+
+    token = jwt.sign(userForToken, process.env.SECRET);
   });
 
   test("creates a new blog post and populates the user", async () => {
@@ -31,6 +41,7 @@ describe("Blog creation and population", () => {
 
     const response = await api
       .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -44,9 +55,8 @@ describe("Blog creation and population", () => {
   });
 
   test("lists all users with blogs", async () => {
-    // Create a blog to ensure there's data for this test
     const newBlog = {
-      title: "Another Test Blog Post",
+      title: "Test Blog Post",
       author: "Jest Tester",
       url: "https://jestjs.io/",
       likes: 0,
@@ -54,6 +64,7 @@ describe("Blog creation and population", () => {
 
     await api
       .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -66,4 +77,3 @@ describe("Blog creation and population", () => {
     await mongoose.connection.close();
   });
 });
-*/

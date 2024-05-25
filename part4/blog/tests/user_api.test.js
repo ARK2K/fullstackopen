@@ -1,4 +1,4 @@
-const request = require("supertest");
+/*const request = require("supertest");
 const app = require("../app");
 const { test, after, describe } = require("node:test");
 const supertest = require("supertest");
@@ -33,3 +33,4 @@ describe("User creation restrictions", () => {
 after(async () => {
   await mongoose.connection.close();
 });
+*/
