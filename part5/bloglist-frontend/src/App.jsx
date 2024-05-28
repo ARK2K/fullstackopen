@@ -20,6 +20,7 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [info, setInfo] = useState("");
   const [isOn, setIsOn] = useState(false);
+  const [blogOn, setBlogOn] = useState(false);
   const [error, setError] = useState({ state: false, message: "" });
 
   useEffect(() => {
@@ -116,6 +117,7 @@ const App = () => {
 
   const blogForm = () => (
     <form onSubmit={addBlog}>
+      <h2>Create new</h2>
       <div>
         <label htmlFor="title">Title:</label>{" "}
         <input name="title" value={newBlogs.title} onChange={handleChange} />
@@ -129,6 +131,7 @@ const App = () => {
         <input name="url" value={newBlogs.url} onChange={handleChange} />
       </div>
       <button type="submit">Create</button>
+      <button onClick={() => setBlogOn(false)}>Cancel</button>
     </form>
   );
 
@@ -143,8 +146,11 @@ const App = () => {
           <p>{user.name} logged in</p>
           <button onClick={handleLogout}>logout</button>
           <div>
-            <h2>Create new</h2>
-            {blogForm()}
+            {!blogOn ? (
+              <button onClick={() => setBlogOn(true)}>New Blog</button>
+            ) : (
+              blogForm()
+            )}
           </div>
           {blogs.map((blog) => (
             <Blog key={blog.id} blog={blog} />
