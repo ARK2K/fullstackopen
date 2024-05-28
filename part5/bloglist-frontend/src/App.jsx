@@ -2,6 +2,15 @@ import { useState, useEffect } from "react";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
+import "./index.css";
+
+const Notification = ({ message, good }) => {
+  if (message === null) {
+    return null;
+  }
+  let val = good ? "success" : "error";
+  return <div className={val + " box"}>{message}</div>;
+};
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -9,8 +18,13 @@ const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [info, setInfo] = useState("");
+  const [isOn, setIsOn] = useState(false);
+  const [error, setError] = useState({ state: false, message: "" });
 
+  useEffect(() => {
+    blogService.getAll().then((blogs) => setBlogs(blogs));
+  }, []);
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogAppUser");
     if (loggedUserJSON) {
@@ -18,7 +32,6 @@ const App = () => {
       setUser(user);
       blogService.setToken(user.token);
     }
-    blogService.getAll().then((blogs) => setBlogs(blogs));
   }, []);
 
   const handleLogin = async (event) => {
@@ -35,9 +48,16 @@ const App = () => {
       setUsername("");
       setPassword("");
     } catch (exception) {
-      setErrorMessage("Wrong credentials");
+      setIsOn(false);
+      setError({
+        state: true,
+        message: "Wrong username or password",
+      });
       setTimeout(() => {
-        setErrorMessage(null);
+        setError({ state: false, message: "" });
+        console.log("complete");
+        setUsername("");
+        setPassword("");
       }, 5000);
     }
   };
@@ -54,11 +74,18 @@ const App = () => {
     blogService.create(blogObject).then((res) => {
       setBlogs([...blogs, res]);
       setNewBlogs({ title: "", author: "", url: "" });
+      setIsOn(true);
+      setTimeout(() => {
+        setIsOn(false);
+        console.log("complete");
+      }, 5000);
+      setInfo(`A new blog ${blogObject.title} by ${blogObject.author} added`);
     });
   };
 
   const loginForm = () => (
     <form onSubmit={handleLogin}>
+      {error.state && <Notification message={error.message} good={false} />}
       <h1>Login</h1>
       <div>
         username{" "}
@@ -112,6 +139,7 @@ const App = () => {
       ) : (
         <div>
           <h1>blogs</h1>
+          {isOn && <Notification message={info} good={true} />}
           <p>{user.name} logged in</p>
           <button onClick={handleLogout}>logout</button>
           <div>
