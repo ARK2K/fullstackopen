@@ -1,6 +1,7 @@
 import { useState } from "react";
+import blogService from "../services/blogs";
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, updateBlog }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   const blogStyle = {
@@ -15,6 +16,21 @@ const Blog = ({ blog }) => {
     setShowDetails(!showDetails);
   };
 
+  const handleLike = async () => {
+    const updatedBlog = {
+      ...blog,
+      likes: blog.likes + 1,
+      user: blog.user.id, // Assuming `blog.user` is an object
+    };
+
+    try {
+      const returnedBlog = await blogService.update(blog.id, updatedBlog);
+      updateBlog(returnedBlog);
+    } catch (error) {
+      console.error("Error liking the blog:", error);
+    }
+  };
+
   return (
     <div style={blogStyle}>
       <div>
@@ -24,9 +40,9 @@ const Blog = ({ blog }) => {
       {showDetails && (
         <div>
           <p>{blog.url}</p>
-          <p>likes: {blog.likes}</p>
           <p>{blog.user.name}</p>
-          <button>Like</button>
+          <p>likes: {blog.likes}</p>
+          <button onClick={handleLike}>Like</button>
         </div>
       )}
     </div>

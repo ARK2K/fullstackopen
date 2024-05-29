@@ -56,6 +56,12 @@ const App = () => {
     blogService.setToken(null);
   };
 
+  const updateBlog = (updatedBlog) => {
+    setBlogs(
+      blogs.map((blog) => (blog.id === updatedBlog.id ? updatedBlog : blog))
+    );
+  };
+
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       {error.state && <Notification message={error.message} good={false} />}
@@ -105,7 +111,7 @@ const App = () => {
             )}
           </div>
           {blogs.map((blog) => (
-            <Blog key={blog.id} blog={blog} />
+            <Blog key={blog.id} blog={blog} updateBlog={updateBlog} />
           ))}
         </div>
       )}
