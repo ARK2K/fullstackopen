@@ -66,6 +66,10 @@ const App = () => {
     );
   };
 
+  const removeBlog = (id) => {
+    setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== id));
+  };
+
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       {error.state && <Notification message={error.message} good={false} />}
@@ -115,7 +119,13 @@ const App = () => {
             )}
           </div>
           {blogs.map((blog) => (
-            <Blog key={blog.id} blog={blog} updateBlog={updateBlog} />
+            <Blog
+              key={blog.id}
+              blog={blog}
+              user={user}
+              updateBlog={updateBlog}
+              removeBlog={removeBlog}
+            />
           ))}
         </div>
       )}
