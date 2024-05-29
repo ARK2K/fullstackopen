@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
 import Blog from "./components/Blog";
-import BlogForm from "./components/BlogForm"; // Import BlogForm
 import blogService from "./services/blogs";
 import loginService from "./services/login";
+import BlogForm from "./components/BlogForm";
 import "./index.css";
 
 const Notification = ({ message, good }) => {
-  if (message === null) {
-    return null;
-  }
-  let val = good ? "success" : "error";
-  return <div className={val + " box"}>{message}</div>;
+  if (!message) return null;
+
+  const notificationStyle = good ? "success box" : "error box";
+  return <div className={notificationStyle}>{message}</div>;
 };
 
 const App = () => {
@@ -39,27 +38,15 @@ const App = () => {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const user = await loginService.login({
-        username,
-        password,
-      });
-
+      const user = await loginService.login({ username, password });
       window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user));
       blogService.setToken(user.token);
       setUser(user);
       setUsername("");
       setPassword("");
     } catch (exception) {
-      setIsOn(false);
-      setError({
-        state: true,
-        message: "Wrong username or password",
-      });
-      setTimeout(() => {
-        setError({ state: false, message: "" });
-        setUsername("");
-        setPassword("");
-      }, 5000);
+      setError({ state: true, message: "Wrong username or password" });
+      setTimeout(() => setError({ state: false, message: "" }), 5000);
     }
   };
 
@@ -67,16 +54,6 @@ const App = () => {
     window.localStorage.removeItem("loggedBlogAppUser");
     setUser(null);
     blogService.setToken(null);
-  };
-
-  const addBlog = (newBlog) => {
-    return blogService.create(newBlog).then((res) => {
-      setBlogs([...blogs, res]);
-      setIsOn(true);
-      setTimeout(() => {
-        setIsOn(false);
-      }, 5000);
-    });
   };
 
   const loginForm = () => (
@@ -120,9 +97,9 @@ const App = () => {
               <button onClick={() => setBlogOn(true)}>New Blog</button>
             ) : (
               <BlogForm
-                addBlog={addBlog}
+                setBlogs={setBlogs}
                 setInfo={setInfo}
-                setError={setError}
+                setIsOn={setIsOn}
                 setBlogOn={setBlogOn}
               />
             )}

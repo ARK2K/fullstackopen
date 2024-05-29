@@ -1,33 +1,28 @@
 import { useState } from "react";
+import blogService from "../services/blogs";
 
-const BlogForm = ({ addBlog, setInfo, setError, setBlogOn }) => {
+const BlogForm = ({ setBlogs, setInfo, setIsOn, setBlogOn }) => {
   const [newBlog, setNewBlog] = useState({ title: "", author: "", url: "" });
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setNewBlog((newBlog) => ({ ...newBlog, [name]: value }));
+    setNewBlog((prevBlog) => ({ ...prevBlog, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const addBlog = (event) => {
     event.preventDefault();
-    addBlog(newBlog)
-      .then((res) => {
-        setInfo(`A new blog ${newBlog.title} by ${newBlog.author} added`);
-        setNewBlog({ title: "", author: "", url: "" });
-      })
-      .catch((error) => {
-        setError({
-          state: true,
-          message: error.response.data.error,
-        });
-        setTimeout(() => {
-          setError({ state: false, message: "" });
-        }, 5000);
-      });
+    blogService.create(newBlog).then((res) => {
+      setBlogs((prevBlogs) => [...prevBlogs, res]);
+      setNewBlog({ title: "", author: "", url: "" });
+      setIsOn(true);
+      setTimeout(() => setIsOn(false), 5000);
+      setInfo(`A new blog ${newBlog.title} by ${newBlog.author} added`);
+      setBlogOn(false);
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={addBlog}>
       <h2>Create new</h2>
       <div>
         <label htmlFor="title">Title:</label>{" "}
@@ -42,7 +37,9 @@ const BlogForm = ({ addBlog, setInfo, setError, setBlogOn }) => {
         <input name="url" value={newBlog.url} onChange={handleChange} />
       </div>
       <button type="submit">Create</button>
-      <button onClick={() => setBlogOn(false)}>Cancel</button>
+      <button type="button" onClick={() => setBlogOn(false)}>
+        Cancel
+      </button>
     </form>
   );
 };
