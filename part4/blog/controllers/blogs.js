@@ -85,7 +85,7 @@ blogsRouter.put("/:id", async (req, res, next) => {
       req.params.id,
       { likes },
       { new: true }
-    );
+    ).populate("user");
 
     if (!blog) {
       return res.status(404).json({ message: "Blog post not found" });

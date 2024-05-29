@@ -40,9 +40,9 @@ const Blog = ({ blog, updateBlog }) => {
       {showDetails && (
         <div>
           <p>{blog.url}</p>
-          <p>{blog.user.name}</p>
           <p>likes: {blog.likes}</p>
           <button onClick={handleLike}>Like</button>
+          <p>{blog.user.name}</p>
         </div>
       )}
     </div>
