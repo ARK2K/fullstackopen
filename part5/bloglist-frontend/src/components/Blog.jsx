@@ -21,7 +21,7 @@ const Blog = ({ blog, user, updateBlog, removeBlog }) => {
     const updatedBlog = {
       ...blog,
       likes: blog.likes + 1,
-      user: blog.user.id, // Assuming `blog.user` is an object
+      user: blog.user.id,
     };
 
     try {
@@ -48,12 +48,12 @@ const Blog = ({ blog, user, updateBlog, removeBlog }) => {
 
   return (
     <div style={blogStyle}>
-      <div>
+      <div className="blog-title-author">
         {blog.title} {blog.author}
         <button onClick={toggleDetails}>{showDetails ? "Hide" : "View"}</button>
       </div>
       {showDetails && (
-        <div>
+        <div className="blog-details">
           <p>{blog.url}</p>
           <p>likes: {blog.likes}</p>
           <button onClick={handleLike}>Like</button>
