@@ -1,65 +1,38 @@
+// src/components/Blog.jsx
+import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { useState } from "react";
-import blogService from "../services/blogs";
 
 const Blog = ({ blog, user, updateBlog, removeBlog }) => {
-  const [showDetails, setShowDetails] = useState(false);
+  const [visible, setVisible] = useState(false);
 
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: "solid",
-    borderWidth: 1,
-    marginBottom: 5,
+  const toggleVisibility = () => {
+    setVisible(!visible);
   };
 
-  const toggleDetails = () => {
-    setShowDetails(!showDetails);
+  const handleLike = () => {
+    updateBlog({ ...blog, likes: blog.likes + 1 });
   };
 
-  const handleLike = async () => {
-    const updatedBlog = {
-      ...blog,
-      likes: blog.likes + 1,
-      user: blog.user.id,
-    };
-
-    try {
-      const returnedBlog = await blogService.update(blog.id, updatedBlog);
-      updateBlog(returnedBlog);
-    } catch (error) {
-      console.error("Error liking the blog:", error);
-    }
-  };
-
-  const handleDelete = async () => {
-    const confirmDelete = window.confirm(
-      `Remove blog ${blog.title} by ${blog.author}?`
-    );
-    if (confirmDelete) {
-      try {
-        await blogService.remove(blog.id);
-        removeBlog(blog.id);
-      } catch (error) {
-        console.error("Error deleting the blog:", error);
-      }
+  const handleRemove = () => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
+      removeBlog(blog.id);
     }
   };
 
   return (
-    <div style={blogStyle}>
-      <div className="blog-title-author">
+    <div className="blog">
+      <div>
         {blog.title} {blog.author}
-        <button onClick={toggleDetails}>{showDetails ? "Hide" : "View"}</button>
+        <button onClick={toggleVisibility}>{visible ? "hide" : "view"}</button>
       </div>
-      {showDetails && (
+      {visible && (
         <div className="blog-details">
-          <p>{blog.url}</p>
-          <p>likes: {blog.likes}</p>
-          <button onClick={handleLike}>Like</button>
-          <p>{blog.user.name}</p>
-          {user && blog.user.username === user.username && (
-            <button onClick={handleDelete}>Remove</button>
+          <div>{blog.url}</div>
+          <div>
+            likes: {blog.likes} <button onClick={handleLike}>like</button>
+          </div>
+          {blog.user.username === user.username && (
+            <button onClick={handleRemove}>remove</button>
           )}
         </div>
       )}
@@ -68,21 +41,8 @@ const Blog = ({ blog, user, updateBlog, removeBlog }) => {
 };
 
 Blog.propTypes = {
-  blog: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    author: PropTypes.string.isRequired,
-    url: PropTypes.string.isRequired,
-    likes: PropTypes.number.isRequired,
-    user: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      username: PropTypes.string.isRequired,
-    }).isRequired,
-  }).isRequired,
-  user: PropTypes.shape({
-    username: PropTypes.string.isRequired,
-  }),
+  blog: PropTypes.object.isRequired,
+  user: PropTypes.object.isRequired,
   updateBlog: PropTypes.func.isRequired,
   removeBlog: PropTypes.func.isRequired,
 };

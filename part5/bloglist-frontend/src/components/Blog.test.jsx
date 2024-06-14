@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+// src/components/Blog.test.jsx
+import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { describe, test, expect } from "vitest";
 import Blog from "./Blog";
@@ -40,5 +41,26 @@ describe("<Blog />", () => {
 
     const likesElement = screen.queryByText("likes: 10");
     expect(likesElement).toBeNull();
+  });
+
+  test("shows url and likes when the button is clicked", () => {
+    render(
+      <Blog
+        blog={blog}
+        user={user}
+        updateBlog={() => {}}
+        removeBlog={() => {}}
+      />
+    );
+
+    const button = screen.getByText("view");
+    fireEvent.click(button);
+
+    // Check if url and likes are rendered after clicking the button
+    const urlElement = screen.getByText("http://testblog.com");
+    expect(urlElement).toBeDefined();
+
+    const likesElement = screen.getByText("likes: 10");
+    expect(likesElement).toBeDefined();
   });
 });
