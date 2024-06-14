@@ -1,7 +1,7 @@
 // src/components/Blog.test.jsx
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, vi } from "vitest";
 import Blog from "./Blog";
 
 describe("<Blog />", () => {
@@ -62,5 +62,27 @@ describe("<Blog />", () => {
 
     const likesElement = screen.getByText("likes: 10");
     expect(likesElement).toBeDefined();
+  });
+
+  test("calls event handler twice when like button is clicked twice", () => {
+    const mockHandler = vi.fn();
+
+    render(
+      <Blog
+        blog={blog}
+        user={user}
+        updateBlog={mockHandler}
+        removeBlog={() => {}}
+      />
+    );
+
+    const button = screen.getByText("view");
+    fireEvent.click(button);
+
+    const likeButton = screen.getByText("like");
+    fireEvent.click(likeButton);
+    fireEvent.click(likeButton);
+
+    expect(mockHandler).toHaveBeenCalledTimes(2);
   });
 });
