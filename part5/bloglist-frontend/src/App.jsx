@@ -108,7 +108,9 @@ const App = () => {
           <button onClick={handleLogout}>logout</button>
           <div>
             {!blogOn ? (
-              <button onClick={() => setBlogOn(true)}>New Blog</button>
+              <button className="new" onClick={() => setBlogOn(true)}>
+                New Blog
+              </button>
             ) : (
               <BlogForm
                 setBlogs={setBlogs}

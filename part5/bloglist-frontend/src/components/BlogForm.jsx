@@ -22,7 +22,7 @@ const BlogForm = ({ setBlogs, setInfo, setIsOn, setBlogOn }) => {
   };
 
   return (
-    <form onSubmit={addBlog}>
+    <form onSubmit={addBlog} className="new-blog-form">
       <h2>Create new</h2>
       <div>
         <label htmlFor="title">Title:</label>{" "}
