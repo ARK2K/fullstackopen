@@ -1,49 +1,41 @@
-import React, { useState } from "react";
-import PropTypes from "prop-types";
+import React from "react";
+import blogService from "../services/blogs";
 
 const Blog = ({ blog, user, updateBlog, removeBlog }) => {
-  const [visible, setVisible] = useState(false);
-
-  const toggleVisibility = () => {
-    setVisible(!visible);
+  const handleLike = async () => {
+    const updatedBlog = { ...blog, likes: blog.likes + 1 };
+    try {
+      const returnedBlog = await blogService.update(blog.id, updatedBlog);
+      updateBlog(returnedBlog);
+    } catch (error) {
+      console.error("Error liking the blog:", error);
+    }
   };
 
-  const handleLike = () => {
-    updateBlog({ ...blog, likes: blog.likes + 1 });
-  };
-
-  const handleRemove = () => {
-    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
-      removeBlog(blog.id);
+  const handleRemove = async () => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
+      try {
+        await blogService.remove(blog.id);
+        removeBlog(blog.id);
+      } catch (error) {
+        console.error("Error removing the blog:", error);
+      }
     }
   };
 
   return (
     <div className="blog">
-      <div>
-        {blog.title} {blog.author}
-        <button onClick={toggleVisibility}>{visible ? "hide" : "view"}</button>
-      </div>
-      {visible && (
-        <div className="blog-details">
-          <div>{blog.url}</div>
-          <div>
-            likes: {blog.likes} <button onClick={handleLike}>like</button>
-          </div>
-          {blog.user.username === user.username && (
-            <button onClick={handleRemove}>remove</button>
-          )}
-        </div>
+      <h3>
+        {blog.title} by {blog.author}
+      </h3>
+      <p>{blog.url}</p>
+      <p>Likes: {blog.likes}</p>
+      <button onClick={handleLike}>Like</button>
+      {user.username === blog.user.username && (
+        <button onClick={handleRemove}>Remove</button>
       )}
     </div>
   );
-};
-
-Blog.propTypes = {
-  blog: PropTypes.object.isRequired,
-  user: PropTypes.object.isRequired,
-  updateBlog: PropTypes.func.isRequired,
-  removeBlog: PropTypes.func.isRequired,
 };
 
 export default Blog;

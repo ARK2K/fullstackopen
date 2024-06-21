@@ -92,5 +92,23 @@ describe("Blog app", () => {
       const blogTitle = await page.locator(".blog").textContent();
       expect(blogTitle).toContain("Test Blog Title");
     });
+
+    test("a blog can be liked", async ({ page }) => {
+      await page.fill('input[name="Username"]', "testuser");
+      await page.fill('input[name="Password"]', "testpassword");
+      await page.click('button[type="submit"]');
+      await page.click("button.new");
+      await page.fill('input[name="title"]', "Test Blog Title");
+      await page.fill('input[name="author"]', "Test Author");
+      await page.fill('input[name="url"]', "http://testblogurl.com");
+      await page.click('button[type="submit"]');
+      await page.waitForSelector(".blog");
+      const likeButton = await page.locator('button:has-text("Like")');
+      await likeButton.click();
+      await page.waitForTimeout(500); // wait for the like to be processed
+
+      const likesCount = await page.locator(".blog").textContent();
+      expect(likesCount).toContain("Likes: 1");
+    });
   });
 });
