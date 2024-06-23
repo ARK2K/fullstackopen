@@ -20,6 +20,36 @@ describe("Blog app", () => {
     );
     console.log("User Creation Response:", userResponse.status());
 
+    // Create a new user (creator)
+    const creatorUser = {
+      name: "Creator User",
+      username: "creatorUser",
+      password: "creatorPassword",
+    };
+    const creatorUserResponse = await request.post(
+      "http://localhost:3003/api/users/",
+      { data: creatorUser }
+    );
+    console.log(
+      "Creator User Creation Response:",
+      creatorUserResponse.status()
+    );
+
+    // Create a different user
+    const differentUser = {
+      name: "Different User",
+      username: "differentUser",
+      password: "differentPassword",
+    };
+    const differentUserResponse = await request.post(
+      "http://localhost:3003/api/users/",
+      { data: differentUser }
+    );
+    console.log(
+      "Different User Creation Response:",
+      differentUserResponse.status()
+    );
+
     // Visit the app
     await page.goto("http://localhost:5173");
   });
@@ -154,6 +184,62 @@ describe("Blog app", () => {
       const blogVisible = await page.isVisible("text=Likes");
       console.log("Blog visible after delete attempt:", blogVisible);
       expect(blogVisible).toBe(false);
+    });
+
+    test("only the user who added the blog sees the delete button", async ({
+      page,
+    }) => {
+      // Log in as the creator
+      await page.fill('input[name="Username"]', "creatorUser");
+      await page.fill('input[name="Password"]', "creatorPassword");
+      await page.click('button[type="submit"]');
+      console.log("Logged in as creator");
+
+      // Create a new blog
+      await page.click("button.new");
+      await page.fill('input[name="title"]', "Test Blog Title");
+      await page.fill('input[name="author"]', "Test Author");
+      await page.fill('input[name="url"]', "http://testblogurl.com");
+      await page.click('button[type="submit"]');
+      console.log("Blog created");
+
+      // Wait for the blog to appear
+      await page.waitForSelector(".blog");
+      console.log("Blog is visible");
+
+      // Verify the delete button is visible for the creator
+      const deleteButtonVisibleForCreator = await page.isVisible(
+        'button:has-text("Delete")'
+      );
+      console.log(
+        "Delete button visible for creator:",
+        deleteButtonVisibleForCreator
+      );
+      expect(deleteButtonVisibleForCreator).toBeTruthy();
+
+      // Log out
+      await page.click('button:has-text("Logout")');
+      console.log("Logged out as creator");
+
+      // Log in as a different user
+      await page.fill('input[name="Username"]', "differentUser");
+      await page.fill('input[name="Password"]', "differentPassword");
+      await page.click('button[type="submit"]');
+      console.log("Logged in as different user");
+
+      // Wait for the blog to appear
+      await page.waitForSelector(".blog");
+      console.log("Blog is visible for different user");
+
+      // Verify the delete button is not visible for the different user
+      const deleteButtonVisibleForDifferentUser = await page.isVisible(
+        'button:has-text("Delete")'
+      );
+      console.log(
+        "Delete button visible for different user:",
+        deleteButtonVisibleForDifferentUser
+      );
+      expect(deleteButtonVisibleForDifferentUser).toBeFalsy();
     });
   });
 });
