@@ -110,5 +110,50 @@ describe("Blog app", () => {
       const likesCount = await page.locator(".blog").textContent();
       expect(likesCount).toContain("Likes: 1");
     });
+
+    test("a new blog can be created and deleted by the creator", async ({
+      page,
+    }) => {
+      // Log in
+      await page.fill('input[name="Username"]', "testuser");
+      await page.fill('input[name="Password"]', "testpassword");
+      await page.click('button[type="submit"]');
+      console.log("Logged in");
+
+      // Create a new blog
+      await page.click("button.new");
+      await page.fill('input[name="title"]', "Test Blog Title");
+      await page.fill('input[name="author"]', "Test Author");
+      await page.fill('input[name="url"]', "http://testblogurl.com");
+      await page.click('button[type="submit"]');
+      console.log("Blog created");
+
+      // Wait for the blog to appear
+      await page.waitForSelector(".blog");
+      console.log("Blog is visible");
+
+      // Setup the dialog event listener before clicking the Delete button
+      page.on("dialog", async (dialog) => {
+        await dialog.accept();
+      });
+
+      // Wait for the Delete button and verify it is visible
+      await page.waitForSelector('button:has-text("Delete")');
+      const deleteButtonVisible = await page.isVisible(
+        'button:has-text("Delete")'
+      );
+      console.log("Delete button visible:", deleteButtonVisible);
+      expect(deleteButtonVisible).toBeTruthy();
+
+      // Click the Delete button
+      await page.click('button:has-text("Delete")');
+      console.log("Delete button clicked");
+
+      // Wait for the blog to disappear
+      await page.waitForTimeout(1000); // Adding a short wait to allow the deletion to process
+      const blogVisible = await page.isVisible("text=Likes");
+      console.log("Blog visible after delete attempt:", blogVisible);
+      expect(blogVisible).toBe(false);
+    });
   });
 });

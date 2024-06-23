@@ -1,12 +1,12 @@
 const express = require("express");
-const { Blog } = require("../models/models");
+const { Blog, User } = require("../models/models");
 const jwt = require("jsonwebtoken");
 const { userExtractor } = require("../utils/webtoken");
 
 const blogsRouter = express.Router();
 
 blogsRouter.get("/", async (req, res) => {
-  const blogs = await Blog.find({}).populate("user", { blogs: 0 });
+  const blogs = await Blog.find({}).populate("user", { username: 1, name: 1 });
   res.json(blogs);
 });
 

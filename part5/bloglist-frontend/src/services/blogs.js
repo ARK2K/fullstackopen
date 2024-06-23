@@ -1,5 +1,5 @@
-import axios from 'axios';
-const baseUrl = '/api/blogs';
+import axios from "axios";
+const baseUrl = "/api/blogs";
 
 let token = null;
 
@@ -10,6 +10,11 @@ const setToken = (newToken) => {
 const getAll = () => {
   const request = axios.get(baseUrl);
   return request.then((response) => response.data);
+};
+
+const getUserById = async (id) => {
+  const response = await axios.get(`/api/users/${id}`);
+  return response.data;
 };
 
 const create = async (newObject) => {
@@ -35,4 +40,4 @@ const remove = async (id) => {
   return response.data;
 };
 
-export default { getAll, create, update, setToken, remove };
+export default { getAll, create, update, setToken, remove, getUserById };
