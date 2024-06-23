@@ -241,5 +241,73 @@ describe("Blog app", () => {
       );
       expect(deleteButtonVisibleForDifferentUser).toBeFalsy();
     });
+
+    test("blogs are arranged in order according to likes, most likes first", async ({
+      page,
+    }) => {
+      // Log in
+      await page.fill('input[name="Username"]', "testuser");
+      await page.fill('input[name="Password"]', "testpassword");
+      await page.click('button[type="submit"]');
+      console.log("Logged in");
+
+      // Create multiple blogs
+      const blogs = [
+        {
+          title: "Blog with 1 like",
+          author: "Author1",
+          url: "http://example1.com",
+          likes: 1,
+        },
+        {
+          title: "Blog with 3 likes",
+          author: "Author2",
+          url: "http://example2.com",
+          likes: 3,
+        },
+        {
+          title: "Blog with 2 likes",
+          author: "Author3",
+          url: "http://example3.com",
+          likes: 2,
+        },
+      ];
+
+      for (const blog of blogs) {
+        await page.click("button.new");
+        await page.fill('input[name="title"]', blog.title);
+        await page.fill('input[name="author"]', blog.author);
+        await page.fill('input[name="url"]', blog.url);
+        await page.click('button[type="submit"]');
+        await page.waitForSelector(".blog");
+        console.log(`Created blog: ${blog.title}`);
+
+        // Add likes to the blog
+        const likeButton = await page.locator(
+          '.blog:has-text("' + blog.title + '") button:has-text("Like")'
+        );
+        for (let i = 0; i < blog.likes; i++) {
+          await likeButton.click();
+          await page.waitForTimeout(500); // wait for the like to be processed
+        }
+      }
+
+      // Ensure blogs are sorted by likes in descending order
+      const blogTitles = await page.locator(".blog").allTextContents();
+      const likes = await Promise.all(
+        blogTitles.map(async (title) => {
+          const likeText = await page
+            .locator('.blog:has-text("' + title + '")')
+            .textContent();
+          const likeCount = parseInt(likeText.match(/Likes: (\d+)/)[1], 10);
+          return likeCount;
+        })
+      );
+
+      const sortedLikes = [...likes].sort((a, b) => b - a);
+      console.log("Likes array:", likes);
+      console.log("Sorted likes array:", sortedLikes);
+      expect(likes).toEqual(sortedLikes);
+    });
   });
 });

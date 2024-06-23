@@ -2,7 +2,12 @@ import { useState } from "react";
 import blogService from "../services/blogs";
 
 const BlogForm = ({ setBlogs, setInfo, setIsOn, setBlogOn }) => {
-  const [newBlog, setNewBlog] = useState({ title: "", author: "", url: "" });
+  const [newBlog, setNewBlog] = useState({
+    title: "",
+    author: "",
+    url: "",
+    likes: "",
+  });
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -13,7 +18,7 @@ const BlogForm = ({ setBlogs, setInfo, setIsOn, setBlogOn }) => {
     event.preventDefault();
     blogService.create(newBlog).then((res) => {
       setBlogs((prevBlogs) => [...prevBlogs, res]);
-      setNewBlog({ title: "", author: "", url: "" });
+      setNewBlog({ title: "", author: "", url: "", likes: "" });
       setIsOn(true);
       setTimeout(() => setIsOn(false), 5000);
       setInfo(`A new blog ${newBlog.title} by ${newBlog.author} added`);
@@ -35,6 +40,15 @@ const BlogForm = ({ setBlogs, setInfo, setIsOn, setBlogOn }) => {
       <div>
         <label htmlFor="url">URL:</label>{" "}
         <input name="url" value={newBlog.url} onChange={handleChange} />
+      </div>
+      <div>
+        <label htmlFor="likes">Likes:</label>
+        <input
+          name="likes"
+          type="number"
+          value={newBlog.likes}
+          onChange={handleChange}
+        />
       </div>
       <button type="submit">Create</button>
       <button type="button" onClick={() => setBlogOn(false)}>
